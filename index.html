@@ -87,7 +87,7 @@ footer a{color:inherit}
 <header>
   <div>
     <h1>Pantau CCTV Palembang</h1>
-    <p class="sub">Rangkuman 50 stream kamera publik kota Palembang dalam satu halaman. Klik kamera untuk memperbesar.</p>
+    <p class="sub">Rangkuman stream kamera publik kota Palembang dalam satu halaman. Klik kamera untuk memperbesar.</p>
   </div>
   <div class="stats" aria-live="polite">
     <div><b id="nOn">–</b>online</div>
@@ -145,6 +145,8 @@ const LOKASI={
   41:"Taman Siswa 2", 42:"Simpang Boom Baru", 43:"", 44:"Simpang Kampus", 45:"Simpang Bandara", 46:"", 47:"Taman Siswa 3", 48:"Simpang Soekarno Hatta", 49:"", 50:"Simpang (belum diketahui)"
 };
 // =====================================================================
+// ===== KAMERA DISEMBUNYIKAN: nomor kamera yang tidak ditampilkan sama sekali =====
+const SEMBUNYI=[31, 32, 34];
 // ===== URUTAN TAMPIL: susun nomor kamera sesuai urutan yang diinginkan =====
 const URUTAN=[
   1, 44, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -158,6 +160,7 @@ const N=50, url=i=>`https://stream.palembang.go.id/cam${i}/main_stream.m3u8`;
 const cams=Array.from({length:N},(_,k)=>({i:k+1,status:'cek',visible:false,hls:null}));
 const grid=document.getElementById('grid'), $=id=>document.getElementById(id);
 const ord=[...new Set(URUTAN.filter(i=>i>=1&&i<=N))];for(let i=1;i<=N;i++)if(!ord.includes(i))ord.push(i);
+for(const h of SEMBUNYI){const k=ord.indexOf(h);if(k>=0)ord.splice(k,1)}
 const urut=ord.map(i=>cams[i-1]);
 let filter='on',saved={};
 try{saved=JSON.parse(localStorage.getItem('cctvNama')||'{}')}catch(e){}
@@ -168,7 +171,7 @@ try{filter=localStorage.getItem('cctvFilter')||'on';$('max').value=localStorage.
 grid.innerHTML=urut.map(c=>`<article class="cam" id="c${c.i}" data-i="${c.i}">
 <div class="scr" tabindex="0" role="button" aria-label="Perbesar kamera ${c.i}"><video muted playsinline></video><div class="msg">Memeriksa…</div></div>
 <div class="meta"><span class="nm"><small>Cam ${c.i}</small> <span class="loc">${esc(nama(c.i)||'Lokasi belum diberi nama')}</span></span><span class="r"><span class="dot">cek</span><button class="ed" aria-label="Ubah nama lokasi kamera ${c.i}" title="Ubah nama lokasi">✎</button></span></div></article>`).join('');
-for(const c of cams){c.el=$('c'+c.i);c.v=c.el.querySelector('video');c.m=c.el.querySelector('.msg');c.d=c.el.querySelector('.dot');c.l=c.el.querySelector('.loc');c.l.classList.toggle('ph',!nama(c.i))}
+for(const c of urut){c.el=$('c'+c.i);c.v=c.el.querySelector('video');c.m=c.el.querySelector('.msg');c.d=c.el.querySelector('.dot');c.l=c.el.querySelector('.loc');c.l.classList.toggle('ph',!nama(c.i))}
 const label=i=>'Cam '+i+(nama(i)?' · '+nama(i):'');
 
 function setStatus(c,s,txt){
@@ -192,13 +195,13 @@ async function probeAll(){
   counts();apply();
 }
 function counts(){
-  $('nOn').textContent=cams.filter(c=>c.status==='on').length;
-  $('nOff').textContent=cams.filter(c=>c.status==='off').length;
-  $('nPlay').textContent=cams.filter(c=>c.hls).length;
+  $('nOn').textContent=urut.filter(c=>c.status==='on').length;
+  $('nOff').textContent=urut.filter(c=>c.status==='off').length;
+  $('nPlay').textContent=urut.filter(c=>c.hls).length;
 }
 function apply(){
   const q=$('q').value.trim();
-  for(const c of cams){
+  for(const c of urut){
     const n=nama(c.i).toLowerCase();
     const okF=filter==='all'||(filter==='on'?c.status!=='off':c.status==='off');
     c.el.hidden=!(okF&&(!q||String(c.i)===q||n.includes(q.toLowerCase())));
@@ -229,17 +232,17 @@ function stop(c){
   c.el.classList.remove('live');if(c.status==='on'){c.m.hidden=false;c.m.textContent='Menunggu giliran diputar'}
   counts();
 }
-function stopAll(){cams.forEach(stop)}
+function stopAll(){urut.forEach(stop)}
 let paused=false;
 function schedule(){
   const max=+$('max').value;
   const want=paused?[]:urut.filter(c=>c.status==='on'&&c.visible&&!c.el.hidden).slice(0,max);
-  for(const c of cams)if(c.hls&&!want.includes(c))stop(c);
+  for(const c of urut)if(c.hls&&!want.includes(c))stop(c);
   for(const c of want)start(c);
-  for(const c of cams)if(c.status==='on'&&!c.hls&&c.visible&&!c.el.hidden)c.m.textContent='Batas putar tercapai – scroll, atau klik untuk memperbesar';
+  for(const c of urut)if(c.status==='on'&&!c.hls&&c.visible&&!c.el.hidden)c.m.textContent='Batas putar tercapai – scroll, atau klik untuk memperbesar';
 }
 const io=new IntersectionObserver(es=>{for(const e of es)cams[+e.target.dataset.i-1].visible=e.isIntersecting;schedule()},{rootMargin:'100px'});
-cams.forEach(c=>io.observe(c.el));
+urut.forEach(c=>io.observe(c.el));
 
 // modal
 const dlg=$('dlg'),dV=$('dV');let dh=null,cur=0;
@@ -321,7 +324,7 @@ function tourClose(){
   if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
   paused=false;schedule();
 }
-$('tourBtn').onclick=()=>{if(cams.some(c=>c.status==='cek')){$('tourBtn').textContent='Tunggu cek status…';setTimeout(()=>$('tourBtn').textContent='▶ Mode Tur',1500);return}tourOpen()};
+$('tourBtn').onclick=()=>{if(urut.some(c=>c.status==='cek')){$('tourBtn').textContent='Tunggu cek status…';setTimeout(()=>$('tourBtn').textContent='▶ Mode Tur',1500);return}tourOpen()};
 $('tX').onclick=tourClose;$('tPrev').onclick=()=>tGo(-1);$('tNext').onclick=()=>tGo(1);
 $('tPlay').onclick=()=>{tRun=!tRun;$('tPlay').textContent=tRun?'⏸ Jeda':'▶ Lanjut';tKick()};
 $('tInt').onchange=()=>{try{localStorage.setItem('cctvInt',$('tInt').value)}catch(e){}tKick()};
