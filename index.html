@@ -95,18 +95,19 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 #tour[data-mode="1"] #tClk2{display:none}
 @supports not (aspect-ratio:1/1){.scr{height:0;padding-top:56.25%}dialog video{height:54vw;max-height:80vh}}
 #diag{opacity:.8}
-.tick{display:flex;align-items:stretch;height:44px;background:#06222e;color:#e6f4f9;border-bottom:3px solid var(--hot);font:600 16px/1 Inter,sans-serif;overflow:hidden}
+.tick{flex:1 1 100%;width:100%;border-radius:10px;display:flex;align-items:stretch;height:44px;background:#06222e;color:#e6f4f9;border-bottom:3px solid var(--hot);font:600 16px/1 Inter,sans-serif;overflow:hidden}
 .tick .tdate{flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;background:var(--hot);color:#fff;font:700 15px "Space Grotesk",sans-serif;white-space:nowrap}
 .tick .tsrc{flex:none;display:flex;align-items:center;padding:0 10px;background:#0b3040;color:#8fb3c0;font:700 12px Inter,sans-serif;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
 .tick .tvw{flex:1;overflow:hidden;position:relative;display:flex;align-items:center}
-.tick .trk{display:inline-flex;white-space:nowrap;will-change:transform;animation:tk var(--dur,60s) linear infinite}
+.tick .trk{flex:none;width:max-content;display:flex;white-space:nowrap;will-change:transform;animation:tk var(--dur,60s) linear infinite}
 .tick .trk:hover{animation-play-state:paused}
-.tick .trk a,.tick .trk span{color:inherit;text-decoration:none;padding:0 18px}
+.tick .trk>a,.tick .trk>span{flex:none;white-space:nowrap;color:inherit;text-decoration:none;padding:0 18px}
+.tick .tdate,.tick .tsrc{min-width:max-content}
 .tick .trk a::before{content:"●";color:var(--hot);margin-right:12px;font-size:10px;vertical-align:middle}
 @keyframes tk{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media(prefers-reduced-motion:reduce){.tick .trk{animation:none}.tick .tvw{overflow-x:auto}}
 @media(max-width:600px){.tick .tsrc{display:none}.tick .tdate{font-size:13px;padding:0 10px}}
-body.touring #tick{position:fixed;top:0;left:0;right:0;z-index:60}
+body.touring #tick{position:fixed;top:0;left:0;right:0;z-index:60;border-radius:0}
 body.touring #tour{padding-top:54px}
 #gate{position:fixed;top:0;right:0;bottom:0;left:0;z-index:100;background:#06222e;color:#e6f4f9;display:grid;place-items:center;padding:20px}
 #gate[hidden]{display:none}
@@ -138,7 +139,6 @@ footer a{color:inherit}
   <button type="submit">Masuk</button>
   <p id="gErr" aria-live="polite"></p>
 </form></div>
-<div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tdate" id="tkDate">–</div><div class="tsrc" id="tkSrc"></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
 <header>
   <div>
     <h1>Pantau CCTV Palembang</h1>
@@ -164,6 +164,7 @@ footer a{color:inherit}
   <button id="re">Cek ulang status</button>
   <button id="logout">Keluar akun</button>
   <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
+  <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tdate" id="tkDate">–</div><div class="tsrc" id="tkSrc"></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
 </div>
 <main>
 <section class="rg" id="rPlg"><h2 class="reg">Kota Palembang</h2><div class="grid" id="grid"></div></section>
@@ -494,14 +495,14 @@ function tClock(){$('tClk2').textContent=$('tClock').textContent=new Date().toLo
 let clk=null;
 function tourOpen(){
   tList=urut.filter(c=>c.status==='on').map(c=>c.i);tPos=0;tOn=true;tWallIds=[];tRun=true;$('tPlay').textContent='⏸ Jeda';
-  paused=true;schedule();tour.hidden=false;document.body.style.overflow='hidden';document.body.classList.add('touring');
+  paused=true;schedule();tour.hidden=false;document.body.style.overflow='hidden';document.body.classList.add('touring');document.body.append($('tick'));
   tClock();clk=setInterval(tClock,1000);tRender();
   fsOn();
 }
 function tourClose(){
   tOn=false;clearTimeout(tTimer);clearInterval(clk);
   for(const e of pool.values()){e.h&&e.h.destroy();e.v.remove()}pool.clear();
-  tour.hidden=true;document.body.style.overflow='';document.body.classList.remove('touring');
+  tour.hidden=true;document.body.style.overflow='';document.body.classList.remove('touring');document.querySelector('.bar').append($('tick'));
   fsOff();
   paused=false;schedule();
 }
