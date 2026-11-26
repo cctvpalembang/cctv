@@ -13,7 +13,8 @@
    PICTURE: grid kamera itu sendiri
    COLOUR+TYPE: tinta gelap #06222e, es #dff1f7, aksen pink #ff2e7e; Space Grotesk + Inter
    LAYOUT: judul kecil, bar kontrol, lalu dinding kamera penuh lebar */
-:root{color-scheme:light dark;--bg:light-dark(#dff1f7,#06222e);--ink:light-dark(#06222e,#e6f4f9);--panel:light-dark(#fff,#0b3040);--mute:light-dark(#4a6a76,#8fb3c0);--line:light-dark(#bcdbe6,#174556);--hot:#ff2e7e;--ok:#18a36b}
+:root{--bg:#06222e;--ink:#e6f4f9;--panel:#0b3040;--mute:#8fb3c0;--line:#174556;--hot:#ff2e7e;--ok:#18a36b}
+@supports (color:light-dark(#000,#fff)){:root{color-scheme:light dark;--bg:light-dark(#dff1f7,#06222e);--ink:light-dark(#06222e,#e6f4f9);--panel:light-dark(#fff,#0b3040);--mute:light-dark(#4a6a76,#8fb3c0);--line:light-dark(#bcdbe6,#174556);--hot:#ff2e7e;--ok:#18a36b}}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
@@ -34,8 +35,8 @@ main{padding:16px max(4vw,16px) 40px}
 .cam{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
 .cam[hidden]{display:none}
 .scr{position:relative;aspect-ratio:16/9;background:#021118;cursor:zoom-in}
-.scr video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.msg{position:absolute;inset:0;display:grid;place-items:center;color:#8fb3c0;font-size:14px;text-align:center;padding:12px}
+.scr video{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover}
+.msg{position:absolute;top:0;right:0;bottom:0;left:0;display:grid;place-items:center;color:#8fb3c0;font-size:14px;text-align:center;padding:12px}
 .msg[hidden],.tth[hidden]{display:none}
 .cam.off .scr{cursor:default}
 .cam.off .msg{color:#c77}
@@ -58,10 +59,10 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .edin{width:100%;min-height:36px;font-size:16px}
 .meta{gap:10px}
 #tourBtn{background:var(--hot);color:#fff;border-color:var(--hot)}
-#tour{position:fixed;inset:0;z-index:50;background:#010b10;color:#e6f4f9;display:grid;grid-template-columns:minmax(0,1fr) clamp(180px,22vw,340px);grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:10px}
+#tour{position:fixed;top:0;right:0;bottom:0;left:0;z-index:50;background:#010b10;color:#e6f4f9;display:grid;grid-template-columns:minmax(0,1fr) clamp(180px,22vw,340px);grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:10px}
 #tour[hidden]{display:none}
 .tmain{position:relative;border-radius:12px;overflow:hidden;background:#000}
-.tmain video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.tmain video{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:contain;background:#000}
 .tcap{position:absolute;left:0;right:0;bottom:0;padding:40px 20px 16px;background:linear-gradient(transparent,rgba(0,0,0,.75));display:flex;justify-content:space-between;align-items:end;gap:12px;pointer-events:none}
 .tcap b{font:700 clamp(20px,2.6vw,36px)/1.1 "Space Grotesk",sans-serif;display:block}
 .tcap small{font:600 14px Inter,sans-serif;color:#8fb3c0}
@@ -72,7 +73,7 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .tside .tq{font:600 13px Inter,sans-serif;color:#8fb3c0;margin:0}
 .tth{position:relative;flex:1 1 0;min-height:0;border-radius:10px;overflow:hidden;background:#021118;cursor:pointer;border:2px solid transparent}
 .tth:hover,.tth:focus-visible{border-color:var(--hot)}
-.tth video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tth video{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover}
 .tth span{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 6px;background:linear-gradient(transparent,rgba(0,0,0,.8));font:600 13px/1.25 Inter,sans-serif}
 .tbar{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .tbar button,.tbar select{background:#0b3040;color:#fff;border-color:#174556}
@@ -86,13 +87,15 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 #tour[data-mode="3"] #tWall{display:grid;grid-template:repeat(3,minmax(0,1fr))/repeat(3,minmax(0,1fr))}
 .tc{position:relative;overflow:hidden;border-radius:10px;background:#021118;cursor:zoom-in;border:2px solid transparent}
 .tc:hover{border-color:#174556}
-.tc video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tc video{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover}
 .tc span{position:absolute;left:0;right:0;bottom:0;padding:18px 10px 6px;background:linear-gradient(transparent,rgba(0,0,0,.8));font:600 clamp(12px,1.1vw,16px)/1.25 Inter,sans-serif}
 .tc.fresh{border-color:var(--hot)}
 .tc.fresh::after{content:"BARU";position:absolute;top:8px;left:8px;background:var(--hot);color:#fff;font:700 11px Inter,sans-serif;padding:3px 6px;border-radius:5px}
 #tClk2{color:#8fb3c0;font-size:14px}
 #tour[data-mode="1"] #tClk2{display:none}
-#gate{position:fixed;inset:0;z-index:100;background:#06222e;color:#e6f4f9;display:grid;place-items:center;padding:20px}
+@supports not (aspect-ratio:1/1){.scr{height:0;padding-top:56.25%}dialog video{height:54vw;max-height:80vh}}
+#diag{opacity:.8}
+#gate{position:fixed;top:0;right:0;bottom:0;left:0;z-index:100;background:#06222e;color:#e6f4f9;display:grid;place-items:center;padding:20px}
 #gate[hidden]{display:none}
 #gate form{width:min(100%,360px);display:flex;flex-direction:column;gap:12px}
 #gate h2{font:700 30px/1.1 "Space Grotesk",sans-serif;margin:0}
@@ -106,7 +109,7 @@ body.locked>*:not(#gate){visibility:hidden}
 .reg small{font:400 14px Inter,sans-serif;color:var(--mute);margin-left:8px}
 section.rg[hidden]{display:none}
 section.rg+section.rg{margin-top:32px}
-a.lk{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:12px;color:#e6f4f9;text-decoration:none;font:600 15px Inter,sans-serif;background:repeating-linear-gradient(135deg,#021118 0 14px,#062330 14px 28px)}
+a.lk{position:absolute;top:0;right:0;bottom:0;left:0;display:grid;place-items:center;text-align:center;padding:12px;color:#e6f4f9;text-decoration:none;font:600 15px Inter,sans-serif;background:repeating-linear-gradient(135deg,#021118 0 14px,#062330 14px 28px)}
 a.lk span{border:1px solid #174556;border-radius:10px;padding:10px 14px;background:#0b3040}
 a.lk:hover span,a.lk:focus-visible span{border-color:var(--hot)}
 footer{padding:0 max(4vw,16px) 32px;color:var(--mute);font-size:13px}
@@ -141,8 +144,9 @@ footer a{color:inherit}
   <button id="fOff" aria-pressed="false">Offline</button>
   <input id="q" type="search" placeholder="Cari nomor / lokasi" aria-label="Cari nomor kamera atau lokasi">
   <label class="inl" for="max">Maks. diputar
-    <select id="max"><option>4</option><option selected>6</option><option>9</option><option>12</option><option>20</option></select>
+    <select id="max"><option>1</option><option>2</option><option>4</option><option selected>6</option><option>9</option><option>12</option><option>20</option></select>
   </label>
+  <button id="lite" aria-pressed="false" title="Untuk TV / perangkat lemah: 1 video sekaligus, pratinjau tur tanpa video">Mode ringan (TV)</button>
   <button id="re">Cek ulang status</button>
   <button id="logout">Keluar akun</button>
   <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
@@ -203,6 +207,11 @@ const URUTAN=[
   41, 42, 43, 2, 45, 46, 47, 48, 49, 50
 ];
 // =====================================================================
+const pl=v=>{try{const p=v.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+const fsOn=()=>{const d=document.documentElement,f=d.requestFullscreen||d.webkitRequestFullscreen;if(f)try{const p=f.call(d);if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+const fsOff=()=>{const f=document.exitFullscreen||document.webkitExitFullscreen;if(f&&(document.fullscreenElement||document.webkitFullscreenElement))try{const p=f.call(document);if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+const UA=navigator.userAgent,TV=/Android TV|GoogleTV|AFT[A-Z]|BRAVIA|SmartTV|SMART-TV|Tizen|Web0S|webOS|HbbTV|CrKey|\bTV\b/i.test(UA);
+let LITE=TV;try{const l=localStorage.getItem('cctvLite');if(l!=null)LITE=l==='1'}catch(e){}
 const N=50, url=i=>`https://stream.palembang.go.id/cam${i}/main_stream.m3u8`;
 const cams=Array.from({length:N},(_,k)=>({i:k+1,status:'cek',visible:false,hls:null}));
 const grid=document.getElementById('grid'), $=id=>document.getElementById(id);
@@ -213,7 +222,7 @@ let filter='on',saved={};
 try{saved=JSON.parse(localStorage.getItem('cctvNama')||'{}')}catch(e){}
 const nama=i=>saved[i]||LOKASI[i]||'';
 const esc=t=>String(t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-try{filter=localStorage.getItem('cctvFilter')||'on';$('max').value=localStorage.getItem('cctvMax')||'6'}catch(e){}
+try{filter=localStorage.getItem('cctvFilter')||'on';$('max').value=localStorage.getItem('cctvMax')||(LITE?'1':'6')}catch(e){}
 
 grid.innerHTML=urut.map(c=>`<article class="cam" id="c${c.i}" data-i="${c.i}">
 <div class="scr" tabindex="0" role="button" aria-label="Perbesar kamera ${c.i}"><video muted playsinline></video><div class="msg">Memeriksa…</div></div>
@@ -257,15 +266,22 @@ function apply(){
   schedule();
 }
 function attach(video,src,onErr){
-  if(window.Hls&&Hls.isSupported()){
-    const h=new Hls({liveSyncDurationCount:2,maxBufferLength:10,enableWorker:true});
+  video.muted=true;video.setAttribute('muted','');video.setAttribute('playsinline','');video.playsInline=true;video.autoplay=true;
+  const nat=()=>{video.onerror=()=>onErr&&onErr();video.src=src;pl(video);return{destroy(){video.onerror=null;video.removeAttribute('src');try{video.load()}catch(e){}}}};
+  const canNat=!!video.canPlayType&&video.canPlayType('application/vnd.apple.mpegurl')!=='';
+  if(window.Hls&&Hls.isSupported()&&!(LITE&&canNat)){
+    const h=new Hls({liveSyncDurationCount:2,maxBufferLength:LITE?6:10,enableWorker:!LITE,capLevelToPlayerSize:true});
+    const w={n:null,rec:0,dead:false,destroy(){this.dead=true;try{h.destroy()}catch(e){}if(this.n)this.n.destroy()}};
     h.loadSource(src);h.attachMedia(video);
-    h.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
-    h.on(Hls.Events.ERROR,(_,d)=>{if(d.fatal){if(d.type===Hls.ErrorTypes.MEDIA_ERROR)h.recoverMediaError();else onErr&&onErr()}});
-    return h;
+    h.on(Hls.Events.MANIFEST_PARSED,()=>pl(video));
+    h.on(Hls.Events.ERROR,(_,d)=>{if(!d.fatal||w.dead)return;
+      if(d.type===Hls.ErrorTypes.MEDIA_ERROR&&w.rec<2){w.rec++;h.recoverMediaError();return}
+      try{h.destroy()}catch(e){}
+      if(canNat&&!w.n&&d.type!==Hls.ErrorTypes.NETWORK_ERROR)w.n=nat();else onErr&&onErr()});
+    return w;
   }
-  if(video.canPlayType('application/vnd.apple.mpegurl')){video.src=src;video.play().catch(()=>{});video.onerror=()=>onErr&&onErr();return{destroy(){video.removeAttribute('src');video.load()}}}
-  return null;
+  if(canNat)return nat();
+  onErr&&onErr();return null;
 }
 function start(c){
   if(c.hls)return;
@@ -347,7 +363,7 @@ function tRenderWall(){
   tWall.replaceChildren(...ids.map((i,k)=>{const d=document.createElement('div');d.className='tc'+(k===tFresh?' fresh':'');d.title='Sorot kamera ini';
     d.append(tVideo(i).v);const sp=document.createElement('span');sp.textContent=label(i);d.append(sp);
     d.onclick=()=>{tPos=tList.indexOf(i);setTMode('1')};return d}));
-  for(const e of pool.values())e.v.play().catch(()=>{});
+  for(const e of pool.values())pl(e.v);
   $('tPos').textContent=tMode==='2'?'Halaman '+(Math.floor(tPos/4)+1)+' / '+Math.ceil(n/4):n+' kamera · 1 berganti tiap giliran';
   tKick();
 }
@@ -361,8 +377,8 @@ function tRender(){
   for(const [i,e] of pool)if(!want.includes(i)){e.h&&e.h.destroy();e.v.remove();pool.delete(i)}
   const m=tVideo(want[0]);tMain.prepend(m.v);
   ths.forEach((t,k)=>{const i=want[k+1];t.querySelectorAll('video,span').forEach(x=>x.remove());t.hidden=i==null||i===want[0];
-    if(t.hidden)return;const e=tVideo(i);t.append(e.v);const sp=document.createElement('span');sp.textContent='Cam '+i+(nama(i)?' · '+nama(i):'');t.append(sp);t.dataset.k=k+1});
-  for(const e of pool.values())e.v.play().catch(()=>{});
+    if(t.hidden)return;if(!LITE){const e=tVideo(i);t.append(e.v)}const sp=document.createElement('span');sp.textContent='Cam '+i+(nama(i)?' · '+nama(i):'');t.append(sp);t.dataset.k=k+1});
+  for(const e of pool.values())pl(e.v);
   $('tNo').textContent='Cam '+want[0];$('tName').textContent=nama(want[0])||'Lokasi belum diberi nama';
   $('tPos').textContent=(tPos+1)+' / '+n;
   tKick();
@@ -382,13 +398,13 @@ function tourOpen(){
   tList=urut.filter(c=>c.status==='on').map(c=>c.i);tPos=0;tOn=true;tWallIds=[];tRun=true;$('tPlay').textContent='⏸ Jeda';
   paused=true;schedule();tour.hidden=false;document.body.style.overflow='hidden';
   tClock();clk=setInterval(tClock,1000);tRender();
-  if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
+  fsOn();
 }
 function tourClose(){
   tOn=false;clearTimeout(tTimer);clearInterval(clk);
   for(const e of pool.values()){e.h&&e.h.destroy();e.v.remove()}pool.clear();
   tour.hidden=true;document.body.style.overflow='';
-  if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+  fsOff();
   paused=false;schedule();
 }
 $('tourBtn').onclick=()=>{if(urut.some(c=>c.status==='cek')){$('tourBtn').textContent='Tunggu cek status…';setTimeout(()=>$('tourBtn').textContent='▶ Mode Tur',1500);return}tourOpen()};
@@ -396,7 +412,7 @@ $('tX').onclick=tourClose;$('tMode').onchange=()=>setTMode($('tMode').value);$('
 $('tPlay').onclick=()=>{tRun=!tRun;$('tPlay').textContent=tRun?'⏸ Jeda':'▶ Lanjut';tKick()};
 $('tInt').onchange=()=>{try{localStorage.setItem('cctvInt',$('tInt').value)}catch(e){}tKick()};
 try{const v=localStorage.getItem('cctvInt');if(v)$('tInt').value=v}catch(e){}
-$('tFs').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else document.documentElement.requestFullscreen?.().catch(()=>{})};
+$('tFs').onclick=()=>{if(document.fullscreenElement||document.webkitFullscreenElement)fsOff();else fsOn()};
 ths.forEach(t=>{const go=()=>t.dataset.k&&tGo(+t.dataset.k);t.onclick=go;t.onkeydown=e=>{if(e.key==='Enter')go()}});
 tMain.onclick=()=>$('tPlay').click();
 document.addEventListener('keydown',e=>{if(!tOn)return;
@@ -420,6 +436,11 @@ function setW(w){wil=w;try{localStorage.setItem('cctvWil',w)}catch(e){}
   if(w==='bya')for(const c of urut)c.visible=false;schedule()}
 $('wAll').onclick=()=>setW('all');$('wPlg').onclick=()=>setW('plg');$('wBya').onclick=()=>setW('bya');
 setW(wil);
+$('lite').setAttribute('aria-pressed',LITE);
+$('lite').onclick=()=>{LITE=!LITE;try{localStorage.setItem('cctvLite',LITE?'1':'0');localStorage.setItem('cctvMax',LITE?'1':'6')}catch(e){}location.reload()};
+{const v=document.createElement('video');const d=document.createElement('span');d.id='diag';
+ d.textContent=' · Kompatibilitas: HLS.js '+(window.Hls&&Hls.isSupported()?'ya':'tidak')+', HLS bawaan '+(v.canPlayType('application/vnd.apple.mpegurl')?'ya':'tidak')+(TV?', TV terdeteksi':'')+(LITE?', mode ringan aktif':'');
+ document.querySelector('footer').append(d)}
 // ===== KATA SANDI (disimpan sebagai hash SHA-256, bukan teks asli) =====
 const PW_HASH='cb9d6474b7f197857cfc7bc9cef737655c8cc3cd25bc586936d20c3cd90c574f';
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('cctv-plg:'+t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
