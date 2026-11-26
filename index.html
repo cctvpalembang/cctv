@@ -88,6 +88,14 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 #gate button{background:#ff2e7e;color:#fff;border-color:#ff2e7e}
 #gErr{color:#ff8fb5;min-height:1.4em}
 body.locked>*:not(#gate){visibility:hidden}
+.wil{display:flex;gap:6px;flex-wrap:wrap}
+.reg{margin:0 0 12px;font:700 22px "Space Grotesk",sans-serif}
+.reg small{font:400 14px Inter,sans-serif;color:var(--mute);margin-left:8px}
+section.rg[hidden]{display:none}
+section.rg+section.rg{margin-top:32px}
+a.lk{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:12px;color:#e6f4f9;text-decoration:none;font:600 15px Inter,sans-serif;background:repeating-linear-gradient(135deg,#021118 0 14px,#062330 14px 28px)}
+a.lk span{border:1px solid #174556;border-radius:10px;padding:10px 14px;background:#0b3040}
+a.lk:hover span,a.lk:focus-visible span{border-color:var(--hot)}
 footer{padding:0 max(4vw,16px) 32px;color:var(--mute);font-size:13px}
 footer a{color:inherit}
 </style>
@@ -104,7 +112,7 @@ footer a{color:inherit}
 <header>
   <div>
     <h1>Pantau CCTV Palembang</h1>
-    <p class="sub">Rangkuman stream kamera publik kota Palembang dalam satu halaman. Klik kamera untuk memperbesar.</p>
+    <p class="sub">Rangkuman kamera publik Kota Palembang dan Kabupaten Banyuasin dalam satu halaman. Klik kamera untuk memperbesar.</p>
   </div>
   <div class="stats" aria-live="polite">
     <div><b id="nOn">–</b>online</div>
@@ -113,6 +121,7 @@ footer a{color:inherit}
   </div>
 </header>
 <div class="bar">
+  <span class="wil" role="group" aria-label="Wilayah"><button id="wAll" aria-pressed="true">Semua wilayah</button><button id="wPlg" aria-pressed="false">Palembang</button><button id="wBya" aria-pressed="false">Banyuasin</button></span>
   <button id="tourBtn" title="Layar penuh, kamera berganti otomatis">▶ Mode Tur</button>
   <button id="fOn" aria-pressed="true">Hanya online</button>
   <button id="fAll" aria-pressed="false">Semua</button>
@@ -125,8 +134,11 @@ footer a{color:inherit}
   <button id="logout">Keluar akun</button>
   <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
 </div>
-<main><div class="grid" id="grid"></div></main>
-<footer>Halaman tidak resmi, bukan situs Pemerintah Kota Palembang. Video diputar langsung dari stream.palembang.go.id; ketersediaan tergantung server sumber. Hanya kamera yang terlihat di layar yang diputar, agar hemat kuota.</footer>
+<main>
+<section class="rg" id="rPlg"><h2 class="reg">Kota Palembang</h2><div class="grid" id="grid"></div></section>
+<section class="rg" id="rBya"><h2 class="reg">Kabupaten Banyuasin <small>dibuka di situs resmi (tab baru)</small></h2><div class="grid" id="gridB"></div></section>
+</main>
+<footer>Halaman tidak resmi, bukan situs Pemerintah Kota Palembang maupun Kabupaten Banyuasin. Video Palembang diputar langsung dari stream.palembang.go.id; kamera Banyuasin dibuka di cctv.banyuasinkab.go.id karena situs itu tidak mengizinkan diputar dari situs lain; ketersediaan tergantung server sumber. Hanya kamera yang terlihat di layar yang diputar, agar hemat kuota.</footer>
 
 <section id="tour" hidden aria-label="Mode tur kamera">
   <div class="tmain" id="tMain"><span class="tlive">LIVE</span>
@@ -359,6 +371,18 @@ $('q').oninput=apply;
 $('max').onchange=()=>{try{localStorage.setItem('cctvMax',$('max').value)}catch(e){}schedule()};
 $('re').onclick=probeAll;
 document.addEventListener('visibilitychange',()=>{paused=document.hidden||dlg.open||tOn;schedule()});
+// ===== CCTV BANYUASIN: nomor kamera dan nama lokasinya (nomor: "nama") =====
+const BANYUASIN={1:"",2:"",4:"",5:"",6:"",7:"",8:"",9:"",10:"",11:"",12:"",13:"",14:""};
+const bUrl=i=>`https://cctv.banyuasinkab.go.id/stream/${i}`;
+$('gridB').innerHTML=Object.keys(BANYUASIN).map(i=>`<article class="cam"><div class="scr"><a class="lk" href="${bUrl(i)}" target="_blank" rel="noopener"><span>▶ Buka kamera ${i} ↗</span></a></div>
+<div class="meta"><span class="nm"><small>Banyuasin · Cam ${i}</small> <span class="loc${BANYUASIN[i]?'':' ph'}">${esc(BANYUASIN[i]||'Lokasi belum diberi nama')}</span></span></div></article>`).join('');
+let wil='all';try{wil=localStorage.getItem('cctvWil')||'all'}catch(e){}
+function setW(w){wil=w;try{localStorage.setItem('cctvWil',w)}catch(e){}
+  $('rPlg').hidden=w==='bya';$('rBya').hidden=w==='plg';
+  for(const [b,v] of [['wAll','all'],['wPlg','plg'],['wBya','bya']])$(b).setAttribute('aria-pressed',w===v);
+  if(w==='bya')for(const c of urut)c.visible=false;schedule()}
+$('wAll').onclick=()=>setW('all');$('wPlg').onclick=()=>setW('plg');$('wBya').onclick=()=>setW('bya');
+setW(wil);
 // ===== KATA SANDI (disimpan sebagai hash SHA-256, bukan teks asli) =====
 const PW_HASH='cb9d6474b7f197857cfc7bc9cef737655c8cc3cd25bc586936d20c3cd90c574f';
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('cctv-plg:'+t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
