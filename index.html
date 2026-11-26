@@ -550,7 +550,7 @@ const BERITA={url:'https://sumsel.antaranews.com/rss/terkini.xml',nama:'ANTARA S
   const show=items=>{const trk=$('tkTrk');
     const html=items.map(x=>x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.title)}</a>`:`<span>${esc(x.title)}</span>`).join('');
     trk.innerHTML=html+html; // digandakan supaya berjalan tanpa putus
-    requestAnimationFrame(()=>trk.style.setProperty('--dur',Math.max(20,trk.scrollWidth/2/70)+'s'))};
+    trk.style.setProperty('--dur',Math.max(20,items.reduce((n,x)=>n+x.title.length+6,0)*0.13)+'s')}; // ±70 piksel/detik
   const parse=t=>{t=t.trim();let out=[];
     if(t[0]==='<'){const x=new DOMParser().parseFromString(t,'text/xml');
       out=[...x.querySelectorAll('item,entry')].map(it=>{const l=it.querySelector('link');return{title:(it.querySelector('title')||{}).textContent,link:l?(l.getAttribute('href')||l.textContent):''}})}
