@@ -55,6 +55,28 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .ed{min-height:36px;min-width:36px;padding:0;border:0;background:none;color:var(--mute);font-size:18px}
 .edin{width:100%;min-height:36px;font-size:16px}
 .meta{gap:10px}
+#tourBtn{background:var(--hot);color:#fff;border-color:var(--hot)}
+#tour{position:fixed;inset:0;z-index:50;background:#010b10;color:#e6f4f9;display:grid;grid-template-columns:minmax(0,1fr) clamp(180px,22vw,340px);grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:10px}
+#tour[hidden]{display:none}
+.tmain{position:relative;border-radius:12px;overflow:hidden;background:#000}
+.tmain video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.tcap{position:absolute;left:0;right:0;bottom:0;padding:40px 20px 16px;background:linear-gradient(transparent,rgba(0,0,0,.75));display:flex;justify-content:space-between;align-items:end;gap:12px;pointer-events:none}
+.tcap b{font:700 clamp(20px,2.6vw,36px)/1.1 "Space Grotesk",sans-serif;display:block}
+.tcap small{font:600 14px Inter,sans-serif;color:#8fb3c0}
+.tclock{font:500 clamp(16px,1.6vw,22px) "Space Grotesk",sans-serif;white-space:nowrap}
+.tlive{position:absolute;top:14px;left:14px;background:var(--hot);color:#fff;font:700 12px Inter,sans-serif;padding:4px 8px;border-radius:6px}
+.tprog{position:absolute;left:0;bottom:0;height:4px;background:var(--hot);width:0}
+.tside{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:hidden}
+.tside .tq{font:600 13px Inter,sans-serif;color:#8fb3c0;margin:0}
+.tth{position:relative;flex:1 1 0;min-height:0;border-radius:10px;overflow:hidden;background:#021118;cursor:pointer;border:2px solid transparent}
+.tth:hover,.tth:focus-visible{border-color:var(--hot)}
+.tth video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tth span{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 6px;background:linear-gradient(transparent,rgba(0,0,0,.8));font:600 13px/1.25 Inter,sans-serif}
+.tbar{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tbar button,.tbar select{background:#0b3040;color:#fff;border-color:#174556}
+.tbar .sp{flex:1}
+@media(max-width:700px),(orientation:portrait){#tour{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 110px auto}.tside{flex-direction:row}.tside .tq{display:none}}
+@media(prefers-reduced-motion:reduce){.tprog{transition:none!important}}
 footer{padding:0 max(4vw,16px) 32px;color:var(--mute);font-size:13px}
 footer a{color:inherit}
 </style>
@@ -72,6 +94,7 @@ footer a{color:inherit}
   </div>
 </header>
 <div class="bar">
+  <button id="tourBtn" title="Layar penuh, kamera berganti otomatis">▶ Mode Tur</button>
   <button id="fOn" aria-pressed="true">Hanya online</button>
   <button id="fAll" aria-pressed="false">Semua</button>
   <button id="fOff" aria-pressed="false">Offline</button>
@@ -84,6 +107,24 @@ footer a{color:inherit}
 </div>
 <main><div class="grid" id="grid"></div></main>
 <footer>Halaman tidak resmi, bukan situs Pemerintah Kota Palembang. Video diputar langsung dari stream.palembang.go.id; ketersediaan tergantung server sumber. Hanya kamera yang terlihat di layar yang diputar, agar hemat kuota.</footer>
+
+<section id="tour" hidden aria-label="Mode tur kamera">
+  <div class="tmain" id="tMain"><span class="tlive">LIVE</span>
+    <div class="tcap"><div><small id="tNo">Cam</small><b id="tName">–</b></div><div class="tclock" id="tClock"></div></div>
+    <div class="tprog" id="tProg"></div></div>
+  <div class="tside"><p class="tq">Berikutnya</p><div class="tth" tabindex="0"></div><div class="tth" tabindex="0"></div><div class="tth" tabindex="0"></div></div>
+  <div class="tbar">
+    <button id="tPrev" aria-label="Kamera sebelumnya">‹ Sebelumnya</button>
+    <button id="tPlay">⏸ Jeda</button>
+    <button id="tNext" aria-label="Kamera berikutnya">Berikutnya ›</button>
+    <label class="inl" for="tInt" style="color:#8fb3c0">Ganti tiap
+      <select id="tInt"><option value="5">5 detik</option><option value="8" selected>8 detik</option><option value="15">15 detik</option><option value="30">30 detik</option><option value="60">60 detik</option></select></label>
+    <span class="sp"></span>
+    <span id="tPos" style="color:#8fb3c0;font-size:14px"></span>
+    <button id="tFs">⛶ Layar penuh</button>
+    <button id="tX">Keluar</button>
+  </div>
+</section>
 
 <dialog id="dlg">
   <div class="dh"><span id="dT">Kamera</span><span><button id="dPrev" aria-label="Kamera sebelumnya">‹</button> <button id="dNext" aria-label="Kamera berikutnya">›</button> <button id="dX">Tutup</button></span></div>
@@ -211,7 +252,7 @@ function step(d){
   const list=urut.filter(c=>c.status==='on'&&!c.el.hidden).map(c=>c.i);if(!list.length)return;
   const k=list.indexOf(cur);openCam(list[(k+d+list.length)%list.length]);
 }
-dlg.addEventListener('close',()=>{if(dh){dh.destroy();dh=null}dV.removeAttribute('src');dV.load();paused=false;schedule()});
+dlg.addEventListener('close',()=>{if(dh){dh.destroy();dh=null}dV.removeAttribute('src');dV.load();paused=tOn;schedule()});
 $('dX').onclick=()=>dlg.close();$('dPrev').onclick=()=>step(-1);$('dNext').onclick=()=>step(1);
 dlg.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')step(-1);if(e.key==='ArrowRight')step(1)});
 grid.addEventListener('click',e=>{
@@ -235,12 +276,66 @@ $('cp').onclick=async()=>{
   try{await navigator.clipboard.writeText(txt);$('cp').textContent='Tersalin ✓'}catch(e){$('cp').textContent='Gagal menyalin'}
   setTimeout(()=>$('cp').textContent='Salin daftar nama',2000);
 };
+// ===== MODE TUR =====
+const tour=$('tour'),tMain=$('tMain'),ths=[...tour.querySelectorAll('.tth')];
+let tList=[],tPos=0,tTimer=null,tStart=0,tRun=true,tOn=false;const pool=new Map();
+const tSec=()=>+$('tInt').value;
+function tVideo(i){
+  if(pool.has(i))return pool.get(i);
+  const v=document.createElement('video');v.muted=true;v.playsInline=true;v.autoplay=true;
+  const e={v,h:null};e.h=attach(v,url(i),()=>{});pool.set(i,e);return e;
+}
+function tRender(){
+  if(!tList.length){$('tName').textContent='Tidak ada kamera online';return}
+  const n=tList.length,want=[0,1,2,3].slice(0,Math.min(4,n)).map(k=>tList[(tPos+k)%n]);
+  for(const [i,e] of pool)if(!want.includes(i)){e.h&&e.h.destroy();e.v.remove();pool.delete(i)}
+  const m=tVideo(want[0]);tMain.prepend(m.v);
+  ths.forEach((t,k)=>{const i=want[k+1];t.querySelectorAll('video,span').forEach(x=>x.remove());t.hidden=i==null||i===want[0];
+    if(t.hidden)return;const e=tVideo(i);t.append(e.v);const sp=document.createElement('span');sp.textContent='Cam '+i+(nama(i)?' · '+nama(i):'');t.append(sp);t.dataset.k=k+1});
+  for(const e of pool.values())e.v.play().catch(()=>{});
+  $('tNo').textContent='Cam '+want[0];$('tName').textContent=nama(want[0])||'Lokasi belum diberi nama';
+  $('tPos').textContent=(tPos+1)+' / '+n;
+  tKick();
+}
+function tKick(){
+  clearTimeout(tTimer);const p=$('tProg');p.style.transition='none';p.style.width='0';
+  if(!tRun||!tOn)return;
+  void p.offsetWidth;p.style.transition='width '+tSec()+'s linear';p.style.width='100%';
+  tTimer=setTimeout(()=>tGo(1),tSec()*1000);
+}
+function tGo(d){if(!tList.length)return;tPos=(tPos+d+tList.length)%tList.length;tRender()}
+function tClock(){$('tClock').textContent=new Date().toLocaleString('id-ID',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+let clk=null;
+function tourOpen(){
+  tList=urut.filter(c=>c.status==='on').map(c=>c.i);tPos=0;tOn=true;tRun=true;$('tPlay').textContent='⏸ Jeda';
+  paused=true;schedule();tour.hidden=false;document.body.style.overflow='hidden';
+  tClock();clk=setInterval(tClock,1000);tRender();
+  if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
+}
+function tourClose(){
+  tOn=false;clearTimeout(tTimer);clearInterval(clk);
+  for(const e of pool.values()){e.h&&e.h.destroy();e.v.remove()}pool.clear();
+  tour.hidden=true;document.body.style.overflow='';
+  if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+  paused=false;schedule();
+}
+$('tourBtn').onclick=()=>{if(cams.some(c=>c.status==='cek')){$('tourBtn').textContent='Tunggu cek status…';setTimeout(()=>$('tourBtn').textContent='▶ Mode Tur',1500);return}tourOpen()};
+$('tX').onclick=tourClose;$('tPrev').onclick=()=>tGo(-1);$('tNext').onclick=()=>tGo(1);
+$('tPlay').onclick=()=>{tRun=!tRun;$('tPlay').textContent=tRun?'⏸ Jeda':'▶ Lanjut';tKick()};
+$('tInt').onchange=()=>{try{localStorage.setItem('cctvInt',$('tInt').value)}catch(e){}tKick()};
+try{const v=localStorage.getItem('cctvInt');if(v)$('tInt').value=v}catch(e){}
+$('tFs').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else document.documentElement.requestFullscreen?.().catch(()=>{})};
+ths.forEach(t=>{const go=()=>t.dataset.k&&tGo(+t.dataset.k);t.onclick=go;t.onkeydown=e=>{if(e.key==='Enter')go()}});
+tMain.onclick=()=>$('tPlay').click();
+document.addEventListener('keydown',e=>{if(!tOn)return;
+  if(e.key==='ArrowRight')tGo(1);else if(e.key==='ArrowLeft')tGo(-1);
+  else if(e.key===' '){e.preventDefault();$('tPlay').click()}else if(e.key==='Escape'&&!document.fullscreenElement)tourClose()});
 const setF=f=>{filter=f;try{localStorage.setItem('cctvFilter',f)}catch(e){}apply()};
 $('fOn').onclick=()=>setF('on');$('fAll').onclick=()=>setF('all');$('fOff').onclick=()=>setF('off');
 $('q').oninput=apply;
 $('max').onchange=()=>{try{localStorage.setItem('cctvMax',$('max').value)}catch(e){}schedule()};
 $('re').onclick=probeAll;
-document.addEventListener('visibilitychange',()=>{paused=document.hidden||dlg.open;schedule()});
+document.addEventListener('visibilitychange',()=>{paused=document.hidden||dlg.open||tOn;schedule()});
 apply();probeAll();
 }
 </script>
