@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pantau CCTV Palembang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: ruang kontrol yang tenang, fungsional
+   IDEA: dinding monitor di pos pemantauan
+   PICTURE: grid kamera itu sendiri
+   COLOUR+TYPE: tinta gelap #06222e, es #dff1f7, aksen pink #ff2e7e; Space Grotesk + Inter
+   LAYOUT: judul kecil, bar kontrol, lalu dinding kamera penuh lebar */
+:root{color-scheme:light dark;--bg:light-dark(#dff1f7,#06222e);--ink:light-dark(#06222e,#e6f4f9);--panel:light-dark(#fff,#0b3040);--mute:light-dark(#4a6a76,#8fb3c0);--line:light-dark(#bcdbe6,#174556);--hot:#ff2e7e;--ok:#18a36b}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+header{padding:28px max(4vw,16px) 12px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+h1{font:700 clamp(28px,4vw,44px)/1.05 "Space Grotesk",sans-serif;margin:0;text-wrap:balance}
+.sub{color:var(--mute);margin:6px 0 0;font-size:15px}
+.stats{display:flex;gap:18px;font:500 15px "Space Grotesk",sans-serif}
+.stats b{font-size:28px;display:block;line-height:1}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px max(4vw,16px);display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-bottom:1px solid var(--line)}
+button,select,input{font:inherit;font-size:16px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:0 14px}
+button{cursor:pointer;font-weight:600}
+button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+input{width:150px}
+label.inl{display:flex;gap:8px;align-items:center;color:var(--mute);font-size:15px}
+main{padding:16px max(4vw,16px) 40px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.cam{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.cam[hidden]{display:none}
+.scr{position:relative;aspect-ratio:16/9;background:#021118;cursor:zoom-in}
+.scr video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.msg{position:absolute;inset:0;display:grid;place-items:center;color:#8fb3c0;font-size:14px;text-align:center;padding:12px}
+.cam.off .scr{cursor:default}
+.cam.off .msg{color:#c77}
+.meta{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;font:500 15px "Space Grotesk",sans-serif}
+.dot{display:inline-flex;align-items:center;gap:6px;font:600 13px Inter,sans-serif;color:var(--mute)}
+.dot::before{content:"";width:9px;height:9px;border-radius:50%;background:#999}
+.on .dot::before{background:var(--ok)}.off .dot::before{background:var(--hot)}
+.live .dot::before{animation:p 1.6s infinite}
+@keyframes p{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.live .dot::before{animation:none}}
+dialog{border:0;padding:0;background:#000;width:min(96vw,1280px);border-radius:14px;color:#fff}
+dialog::backdrop{background:rgba(2,17,24,.85)}
+dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;gap:8px;font:500 16px "Space Grotesk",sans-serif}
+.dh button{background:#0b3040;color:#fff;border-color:#174556}
+.nm{display:flex;flex-direction:column;line-height:1.25}.nm small{font:600 12px Inter,sans-serif;color:var(--mute)}
+.loc.ph{color:var(--mute);font-style:italic;font-weight:400}
+.r{display:flex;align-items:center;gap:6px;flex:none}
+.ed{min-height:36px;min-width:36px;padding:0;border:0;background:none;color:var(--mute);font-size:18px}
+.edin{width:100%;min-height:36px;font-size:16px}
+.meta{gap:10px}
+footer{padding:0 max(4vw,16px) 32px;color:var(--mute);font-size:13px}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Pantau CCTV Palembang</h1>
+    <p class="sub">Rangkuman 50 stream kamera publik kota Palembang dalam satu halaman. Klik kamera untuk memperbesar.</p>
+  </div>
+  <div class="stats" aria-live="polite">
+    <div><b id="nOn">–</b>online</div>
+    <div><b id="nOff">–</b>offline</div>
+    <div><b id="nPlay">0</b>diputar</div>
+  </div>
+</header>
+<div class="bar">
+  <button id="fOn" aria-pressed="true">Hanya online</button>
+  <button id="fAll" aria-pressed="false">Semua</button>
+  <button id="fOff" aria-pressed="false">Offline</button>
+  <input id="q" type="search" placeholder="Cari nomor / lokasi" aria-label="Cari nomor kamera atau lokasi">
+  <label class="inl" for="max">Maks. diputar
+    <select id="max"><option>4</option><option selected>6</option><option>9</option><option>12</option><option>20</option></select>
+  </label>
+  <button id="re">Cek ulang status</button>
+  <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
+</div>
+<main><div class="grid" id="grid"></div></main>
+<footer>Halaman tidak resmi, bukan situs Pemerintah Kota Palembang. Video diputar langsung dari stream.palembang.go.id; ketersediaan tergantung server sumber. Hanya kamera yang terlihat di layar yang diputar, agar hemat kuota.</footer>
+
+<dialog id="dlg">
+  <div class="dh"><span id="dT">Kamera</span><span><button id="dPrev" aria-label="Kamera sebelumnya">‹</button> <button id="dNext" aria-label="Kamera berikutnya">›</button> <button id="dX">Tutup</button></span></div>
+  <video id="dV" muted playsinline controls></video>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<script>
+{
+// ===== NAMA LOKASI: isi nama tiap kamera di sini (nomor: "nama") =====
+const LOKASI={
+  1:"", 2:"BKB", 3:"Simpang Polda", 4:"Simpang Macan Lindung", 5:"Simpang Angkatan 45 / Dunkin Donat", 6:"Simpang Cinde", 7:"", 8:"Simpang Charitas", 9:"Bundaran Air Mancur", 10:"",
+  11:"", 12:"", 13:"KM 12", 14:"", 15:"", 16:"", 17:"", 18:"", 19:"", 20:"Plaza 7 Ulu",
+  21:"Samsat", 22:"", 23:"", 24:"Darma Agung (KM 17)", 25:"Parkir BKB", 26:"", 27:"", 28:"", 29:"", 30:"Arah Ampera",
+  31:"", 32:"", 33:"", 34:"", 35:"", 36:"Pasar 16", 37:"Depan Satpol PP", 38:"Lampu Merah Kol. Atmo", 39:"Bank Sumsel Atmo", 40:"Taman Siswa 1",
+  41:"Taman Siswa 2", 42:"Simpang Boom Baru", 43:"", 44:"Simpang Kampus", 45:"Simpang Bandara", 46:"", 47:"Taman Siswa 3", 48:"Simpang Soekarno Hatta", 49:"", 50:"Simpang (belum diketahui)"
+};
+// =====================================================================
+// ===== URUTAN TAMPIL: susun nomor kamera sesuai urutan yang diinginkan =====
+const URUTAN=[
+  1, 44, 3, 4, 5, 6, 7, 8, 9, 10,
+  11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+  31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+  41, 42, 43, 2, 45, 46, 47, 48, 49, 50
+];
+// =====================================================================
+const N=50, url=i=>`https://stream.palembang.go.id/cam${i}/main_stream.m3u8`;
+const cams=Array.from({length:N},(_,k)=>({i:k+1,status:'cek',visible:false,hls:null}));
+const grid=document.getElementById('grid'), $=id=>document.getElementById(id);
+const ord=[...new Set(URUTAN.filter(i=>i>=1&&i<=N))];for(let i=1;i<=N;i++)if(!ord.includes(i))ord.push(i);
+const urut=ord.map(i=>cams[i-1]);
+let filter='on',saved={};
+try{saved=JSON.parse(localStorage.getItem('cctvNama')||'{}')}catch(e){}
+const nama=i=>saved[i]||LOKASI[i]||'';
+const esc=t=>String(t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+try{filter=localStorage.getItem('cctvFilter')||'on';$('max').value=localStorage.getItem('cctvMax')||'6'}catch(e){}
+
+grid.innerHTML=urut.map(c=>`<article class="cam" id="c${c.i}" data-i="${c.i}">
+<div class="scr" tabindex="0" role="button" aria-label="Perbesar kamera ${c.i}"><video muted playsinline></video><div class="msg">Memeriksa…</div></div>
+<div class="meta"><span class="nm"><small>Cam ${c.i}</small> <span class="loc">${esc(nama(c.i)||'Lokasi belum diberi nama')}</span></span><span class="r"><span class="dot">cek</span><button class="ed" aria-label="Ubah nama lokasi kamera ${c.i}" title="Ubah nama lokasi">✎</button></span></div></article>`).join('');
+for(const c of cams){c.el=$('c'+c.i);c.v=c.el.querySelector('video');c.m=c.el.querySelector('.msg');c.d=c.el.querySelector('.dot');c.l=c.el.querySelector('.loc');c.l.classList.toggle('ph',!nama(c.i))}
+const label=i=>'Cam '+i+(nama(i)?' · '+nama(i):'');
+
+function setStatus(c,s,txt){
+  c.status=s;c.el.classList.toggle('on',s==='on');c.el.classList.toggle('off',s==='off');
+  c.d.textContent=s==='on'?'online':s==='off'?'offline':'cek';
+  c.m.textContent=txt;c.m.hidden=false;
+}
+async function probe(c){
+  setStatus(c,'cek','Memeriksa…');
+  try{
+    const r=await fetch(url(c.i),{cache:'no-store'});
+    const t=r.ok?await r.text():'';
+    if(r.ok&&t.includes('#EXTM3U'))setStatus(c,'on','Menunggu giliran diputar');
+    else setStatus(c,'off','Offline (HTTP '+r.status+')');
+  }catch(e){setStatus(c,'off','Tidak bisa dijangkau')}
+}
+async function probeAll(){
+  stopAll();$('nOn').textContent=$('nOff').textContent='–';
+  const q=[...urut];const work=async()=>{while(q.length)await probe(q.shift())};
+  await Promise.all(Array.from({length:8},work));
+  counts();apply();
+}
+function counts(){
+  $('nOn').textContent=cams.filter(c=>c.status==='on').length;
+  $('nOff').textContent=cams.filter(c=>c.status==='off').length;
+  $('nPlay').textContent=cams.filter(c=>c.hls).length;
+}
+function apply(){
+  const q=$('q').value.trim();
+  for(const c of cams){
+    const n=nama(c.i).toLowerCase();
+    const okF=filter==='all'||(filter==='on'?c.status!=='off':c.status==='off');
+    c.el.hidden=!(okF&&(!q||String(c.i)===q||n.includes(q.toLowerCase())));
+  }
+  for(const b of ['On','All','Off'])$('f'+b).setAttribute('aria-pressed',filter===b.toLowerCase());
+  schedule();
+}
+function attach(video,src,onErr){
+  if(window.Hls&&Hls.isSupported()){
+    const h=new Hls({liveSyncDurationCount:2,maxBufferLength:10,enableWorker:true});
+    h.loadSource(src);h.attachMedia(video);
+    h.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
+    h.on(Hls.Events.ERROR,(_,d)=>{if(d.fatal){if(d.type===Hls.ErrorTypes.MEDIA_ERROR)h.recoverMediaError();else onErr&&onErr()}});
+    return h;
+  }
+  if(video.canPlayType('application/vnd.apple.mpegurl')){video.src=src;video.play().catch(()=>{});video.onerror=()=>onErr&&onErr();return{destroy(){video.removeAttribute('src');video.load()}}}
+  return null;
+}
+function start(c){
+  if(c.hls)return;
+  c.m.textContent='Memuat…';
+  c.hls=attach(c.v,url(c.i),()=>{stop(c);setStatus(c,'off','Stream terputus');counts();apply()});
+  c.v.onplaying=()=>{c.m.hidden=true;c.el.classList.add('live')};
+  counts();
+}
+function stop(c){
+  if(!c.hls)return;c.hls.destroy();c.hls=null;c.v.removeAttribute('src');c.v.load();
+  c.el.classList.remove('live');if(c.status==='on'){c.m.hidden=false;c.m.textContent='Menunggu giliran diputar'}
+  counts();
+}
+function stopAll(){cams.forEach(stop)}
+let paused=false;
+function schedule(){
+  const max=+$('max').value;
+  const want=paused?[]:urut.filter(c=>c.status==='on'&&c.visible&&!c.el.hidden).slice(0,max);
+  for(const c of cams)if(c.hls&&!want.includes(c))stop(c);
+  for(const c of want)start(c);
+  for(const c of cams)if(c.status==='on'&&!c.hls&&c.visible&&!c.el.hidden)c.m.textContent='Batas putar tercapai – scroll, atau klik untuk memperbesar';
+}
+const io=new IntersectionObserver(es=>{for(const e of es)cams[+e.target.dataset.i-1].visible=e.isIntersecting;schedule()},{rootMargin:'100px'});
+cams.forEach(c=>io.observe(c.el));
+
+// modal
+const dlg=$('dlg'),dV=$('dV');let dh=null,cur=0;
+function openCam(i){
+  const c=cams[i-1];if(c.status==='off')return;
+  cur=i;paused=true;schedule();
+  if(dh)dh.destroy();$('dT').textContent=label(i);
+  dh=attach(dV,url(i),()=>{$('dT').textContent='Kamera '+i+' – stream gagal dimuat'});
+  if(!dlg.open)dlg.showModal();
+}
+function step(d){
+  const list=urut.filter(c=>c.status==='on'&&!c.el.hidden).map(c=>c.i);if(!list.length)return;
+  const k=list.indexOf(cur);openCam(list[(k+d+list.length)%list.length]);
+}
+dlg.addEventListener('close',()=>{if(dh){dh.destroy();dh=null}dV.removeAttribute('src');dV.load();paused=false;schedule()});
+$('dX').onclick=()=>dlg.close();$('dPrev').onclick=()=>step(-1);$('dNext').onclick=()=>step(1);
+dlg.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')step(-1);if(e.key==='ArrowRight')step(1)});
+grid.addEventListener('click',e=>{
+  const b=e.target.closest('.ed');
+  if(b){const c=cams[+b.closest('.cam').dataset.i-1];editName(c);return}const s=e.target.closest('.scr');if(s)openCam(+s.parentNode.dataset.i)});
+grid.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.scr')){e.preventDefault();openCam(+e.target.parentNode.dataset.i)}});
+
+function editName(c){
+  const inp=document.createElement('input');inp.value=nama(c.i);inp.placeholder='Nama lokasi';inp.className='edin';
+  c.l.replaceWith(inp);inp.focus();
+  let fin=false;const done=save=>{
+    if(fin)return;fin=true;
+    if(save){const v=inp.value.trim();if(v)saved[c.i]=v;else delete saved[c.i];try{localStorage.setItem('cctvNama',JSON.stringify(saved))}catch(e){}}
+    c.l.textContent=nama(c.i)||'Lokasi belum diberi nama';c.l.classList.toggle('ph',!nama(c.i));inp.replaceWith(c.l);apply();
+  };
+  inp.onkeydown=e=>{if(e.key==='Enter')done(true);if(e.key==='Escape')done(false)};
+  inp.onblur=()=>done(true);
+}
+$('cp').onclick=async()=>{
+  const txt='const LOKASI={\n'+cams.map(c=>'  '+c.i+':'+JSON.stringify(nama(c.i))).join(',\n')+'\n};';
+  try{await navigator.clipboard.writeText(txt);$('cp').textContent='Tersalin ✓'}catch(e){$('cp').textContent='Gagal menyalin'}
+  setTimeout(()=>$('cp').textContent='Salin daftar nama',2000);
+};
+const setF=f=>{filter=f;try{localStorage.setItem('cctvFilter',f)}catch(e){}apply()};
+$('fOn').onclick=()=>setF('on');$('fAll').onclick=()=>setF('all');$('fOff').onclick=()=>setF('off');
+$('q').oninput=apply;
+$('max').onchange=()=>{try{localStorage.setItem('cctvMax',$('max').value)}catch(e){}schedule()};
+$('re').onclick=probeAll;
+document.addEventListener('visibilitychange',()=>{paused=document.hidden||dlg.open;schedule()});
+apply();probeAll();
+}
+</script>
+</body>
+</html>
