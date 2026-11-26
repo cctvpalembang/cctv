@@ -18,19 +18,19 @@
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
-header{padding:28px max(4vw,16px) 12px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
-h1{font:700 clamp(28px,4vw,44px)/1.05 "Space Grotesk",sans-serif;margin:0;text-wrap:balance}
-.sub{color:var(--mute);margin:6px 0 0;font-size:15px}
-.stats{display:flex;gap:18px;font:500 15px "Space Grotesk",sans-serif}
-.stats b{font-size:28px;display:block;line-height:1}
-.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px max(4vw,16px);display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-bottom:1px solid var(--line)}
-button,select,input{font:inherit;font-size:16px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:0 14px}
+header{padding:8px max(2vw,12px) 4px;display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;justify-content:space-between}
+h1{font:700 clamp(18px,1.8vw,24px)/1.1 "Space Grotesk",sans-serif;margin:0}
+.sub{display:none}
+.stats{display:flex;gap:14px;font:500 14px "Space Grotesk",sans-serif;color:var(--mute)}
+.stats b{font-size:18px;color:var(--ink);margin-right:4px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px max(2vw,12px);display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:1px solid var(--line)}
+button,select,input{font:inherit;font-size:15px;min-height:38px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:0 12px}
 button{cursor:pointer;font-weight:600}
 button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 :focus-visible{outline:3px solid var(--hot);outline-offset:2px}
 input{width:150px}
 label.inl{display:flex;gap:8px;align-items:center;color:var(--mute);font-size:15px}
-main{padding:16px max(4vw,16px) 40px}
+main{padding:10px max(2vw,12px) 40px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
 .cam{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
 .cam[hidden]{display:none}
@@ -111,6 +111,12 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 @media(max-width:600px){.tick .tsrc{display:none}.tick .twx{font-size:13px;padding:0 8px}.tick .twx small{display:none}.tick .tdate{font-size:13px;padding:0 10px}}
 body.touring #tick{position:fixed;top:0;left:0;right:0;z-index:60;border-radius:0}
 body.touring #tour{padding-top:54px}
+.more{position:relative}
+.more summary{list-style:none;cursor:pointer;min-height:38px;display:flex;align-items:center;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-weight:600;font-size:15px}
+.more summary::-webkit-details-marker{display:none}
+.more .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:20;display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);min-width:220px}
+.more .menu button{text-align:left}
+.tick{height:38px!important}
 #gate{position:fixed;top:0;right:0;bottom:0;left:0;z-index:100;background:#06222e;color:#e6f4f9;display:grid;place-items:center;padding:20px}
 #gate[hidden]{display:none}
 #gate form{width:min(100%,360px);display:flex;flex-direction:column;gap:12px}
@@ -121,7 +127,7 @@ body.touring #tour{padding-top:54px}
 #gErr{color:#ff8fb5;min-height:1.4em}
 body.locked>*:not(#gate){visibility:hidden}
 .wil{display:flex;gap:6px;flex-wrap:wrap}
-.reg{margin:0 0 12px;font:700 22px "Space Grotesk",sans-serif}
+.reg{margin:0 0 8px;font-size:17px!important;font:700 22px "Space Grotesk",sans-serif}
 .reg small{font:400 14px Inter,sans-serif;color:var(--mute);margin-left:8px}
 section.rg[hidden]{display:none}
 section.rg+section.rg{margin-top:32px}
@@ -143,7 +149,7 @@ footer a{color:inherit}
 </form></div>
 <header>
   <div>
-    <h1>Pantau CCTV Palembang</h1>
+    <h1 title="Rangkuman kamera publik Kota Palembang dan Kabupaten Banyuasin. Klik kamera untuk memperbesar.">Pantau CCTV Palembang</h1>
     <p class="sub">Rangkuman kamera publik Kota Palembang dan Kabupaten Banyuasin dalam satu halaman. Klik kamera untuk memperbesar.</p>
   </div>
   <div class="stats" aria-live="polite">
@@ -162,10 +168,12 @@ footer a{color:inherit}
   <label class="inl" for="max">Maks. diputar
     <select id="max"><option>1</option><option>2</option><option>4</option><option selected>6</option><option>9</option><option>12</option><option>20</option></select>
   </label>
+  <details class="more"><summary>⋯ Lainnya</summary><div class="menu">
   <button id="lite" aria-pressed="false" title="Untuk TV / perangkat lemah: 1 video sekaligus, pratinjau tur tanpa video">Mode ringan (TV)</button>
   <button id="re">Cek ulang status</button>
   <button id="logout">Keluar akun</button>
   <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
+  </div></details>
   <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tdate" id="tkDate">–</div><div class="twx" id="tkWx" aria-live="off">Memuat cuaca…</div><div class="tsrc" id="tkSrc"></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
 </div>
 <main>
