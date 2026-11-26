@@ -333,7 +333,7 @@ function frame(cv,ctx){
 function recStop(){cancelAnimationFrame(rec.raf);clearInterval(rec.timer);clearTimeout(rec.t2);
   for(const r of rec.rs)if(r)try{r.mr.onstop=null;r.mr.stop()}catch(e){}rec.rs=[];rec.mk=null}
 function recStart(){
-  recStop();$('dMsg').textContent='';if(!MIME||LITE)return;
+  recStop();sbReset();if(!MIME||LITE)return;
   const cv=rec.cv=document.createElement('canvas'),ctx=cv.getContext('2d');cv.width=960;cv.height=540;
   let last=0;const draw=t=>{rec.raf=requestAnimationFrame(draw);if(t-last<66)return;last=t;frame(cv,ctx)};draw(0);
   const stream=cv.captureStream(15);
@@ -344,31 +344,44 @@ function recStart(){
   rec.timer=setInterval(()=>{const now=performance.now();rec.rs.forEach((r,k)=>{if(r&&now-r.t>=2*CLIP){try{r.mr.stop()}catch(e){}rec.rs[k]=rec.mk()}})},250);
 }
 const fname=ext=>('cctv-'+label(cur)+'-'+new Date().toISOString().slice(0,19)).replace(/[^\w-]+/g,'_')+'.'+ext;
-async function give(blob,name,text){
-  const file=new File([blob],name,{type:blob.type});
-  if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){
-    try{await navigator.share({files:[file],text});$('dMsg').textContent='Terkirim ke menu bagikan ✓';return}catch(e){if(e.name==='AbortError'){$('dMsg').textContent='';return}}}
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),60000);
-  $('dMsg').textContent='Tersimpan di unduhan. Lampirkan file itu di WhatsApp.';
+const SB=$('dShare'),SB0=SB.innerHTML;let ready=null,busy=false;
+function sbSet(html,dis,msg){SB.innerHTML=html;SB.disabled=!!dis;SB.style.opacity=dis?.7:1;if(msg!=null)$('dMsg').textContent=msg}
+function sbReset(){ready=null;busy=false;sbSet(SB0,false,'')}
+function download(f){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),60000)}
+const canFile=f=>!!(navigator.canShare&&navigator.share&&navigator.canShare({files:[f]}));
+// kirim berkas yang sudah siap; dipanggil langsung di dalam ketukan supaya menu bagikan pasti terbuka
+function send(f,text){
+  ready=null;
+  if(!canFile(f)){download(f);sbSet(SB0,false,'Tersimpan di unduhan. Lampirkan file itu di WhatsApp.');return}
+  navigator.share({files:[f],text}).then(()=>sbSet(SB0,false,'Terkirim ke menu bagikan ✓'),e=>{
+    if(e&&e.name==='NotAllowedError'){ready={f,text};sbSet('✅ Siap – ketuk untuk kirim',false,'Video siap. Ketuk sekali lagi untuk membuka WhatsApp.')}
+    else sbSet(SB0,false,'')})
 }
-$('dShare').onclick=async()=>{
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+SB.onclick=async()=>{
+  if(ready){const x=ready;send(x.f,x.text);return}
+  if(busy)return;busy=true;
   const text=label(cur)+' · '+stamp()+' · Pantau CCTV';
-  const now=performance.now(),rs=rec.rs.filter(Boolean);
-  if(!rs.length){ // tidak bisa merekam: bagikan foto layar
-    if(dV.readyState<2){$('dMsg').textContent='Video belum tampil.';return}
-    const cv=document.createElement('canvas');frame(cv,cv.getContext('2d'));
-    cv.toBlob(b=>b?give(b,fname('jpg'),text):($('dMsg').textContent='Gagal mengambil gambar.'),'image/jpeg',.9);return}
-  // pilih perekam terlama (berisi CLIP–2×CLIP detik terakhir)
-  const r=rs.reduce((a,b)=>a.t<b.t?a:b);
-  if(now-r.t<2000||dV.readyState<2){$('dMsg').textContent='Tunggu beberapa detik, video baru mulai direkam…';return}
-  $('dMsg').textContent='Menyiapkan video…';
-  const k=rec.rs.indexOf(r);
-  const blob=await new Promise(res=>{r.mr.onstop=()=>res(new Blob(r.ch,{type:MIME.split(';')[0]}));try{r.mr.stop()}catch(e){res(null)}});
-  if(rec.mk)rec.rs[k]=rec.mk();
-  if(!blob||!blob.size){$('dMsg').textContent='Gagal merekam.';return}
-  await give(blob,fname(MIME.indexOf('mp4')>=0?'mp4':'webm'),text);
-  if(MIME.indexOf('mp4')<0)$('dMsg').textContent+=' (format WebM: WhatsApp mungkin menolak, buka di browser Chrome terbaru untuk MP4)';
+  try{
+    if(!rec.rs.filter(Boolean).length){ // tidak bisa merekam: bagikan foto layar
+      if(dV.readyState<2){sbSet(SB0,false,'Video belum tampil.');return}
+      const cv=document.createElement('canvas');frame(cv,cv.getContext('2d'));
+      const bl=await new Promise(r=>cv.toBlob(r,'image/jpeg',.9));
+      if(!bl){sbSet(SB0,false,'Gagal mengambil gambar.');return}
+      send(new File([bl],fname('jpg'),{type:'image/jpeg'}),text);return}
+    // kalau baru mulai, tunggu sampai minimal 3 detik terekam (tampilkan hitung mundur)
+    for(;;){const rs=rec.rs.filter(Boolean);if(!rs.length){sbSet(SB0,false,'');return}
+      const r=rs.reduce((a,b)=>a.t<b.t?a:b),left=Math.ceil((3000-(performance.now()-r.t))/1000);
+      if(left<=0&&dV.readyState>=2)break;sbSet('⏳ Merekam… '+Math.max(left,1),true,'Mengumpulkan beberapa detik video…');await wait(400)}
+    sbSet('⏳ Menyiapkan video…',true,'');
+    const rs=rec.rs.filter(Boolean),r=rs.reduce((a,b)=>a.t<b.t?a:b),k=rec.rs.indexOf(r);
+    const blob=await new Promise(res=>{r.mr.onstop=()=>res(new Blob(r.ch,{type:MIME.split(';')[0]}));try{r.mr.stop()}catch(e){res(null)}});
+    if(rec.mk)rec.rs[k]=rec.mk();
+    if(!blob||!blob.size){sbSet(SB0,false,'Gagal merekam.');return}
+    send(new File([blob],fname(MIME.indexOf('mp4')>=0?'mp4':'webm'),{type:blob.type}),text);
+    if(MIME.indexOf('mp4')<0)$('dMsg').textContent+=' (format WebM: WhatsApp mungkin menolak)';
+  }finally{busy=false}
 };
 function step(d){
   const list=urut.filter(c=>c.status==='on'&&!c.el.hidden).map(c=>c.i);if(!list.length)return;
