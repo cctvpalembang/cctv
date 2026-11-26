@@ -51,7 +51,7 @@ dialog{border:0;padding:0;background:#000;width:min(96vw,1280px);border-radius:1
 dialog::backdrop{background:rgba(2,17,24,.85)}
 dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .dh{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;gap:8px;font:500 16px "Space Grotesk",sans-serif}
-.dh button{background:#0b3040;color:#fff;border-color:#174556}
+.dh{flex-wrap:wrap}.dh button{background:#0b3040;color:#fff;border-color:#174556}
 .nm{display:flex;flex-direction:column;line-height:1.25}.nm small{font:600 12px Inter,sans-serif;color:var(--mute)}
 .loc.ph{color:var(--mute);font-style:italic;font-weight:400}
 .r{display:flex;align-items:center;gap:6px;flex:none}
@@ -180,7 +180,7 @@ footer a{color:inherit}
 </section>
 
 <dialog id="dlg">
-  <div class="dh"><span id="dT">Kamera</span><span><button id="dPrev" aria-label="Kamera sebelumnya">‹</button> <button id="dNext" aria-label="Kamera berikutnya">›</button> <button id="dX">Tutup</button></span></div>
+  <div class="dh"><span id="dT">Kamera</span><span><span id="dMsg" aria-live="polite" style="font:500 13px Inter,sans-serif;color:#8fb3c0"></span> <button id="dShare" style="background:#18a36b;border-color:#18a36b" title="Kirim cuplikan beberapa detik terakhir, misalnya ke WhatsApp">📤 Bagikan 5 detik</button> <button id="dPrev" aria-label="Kamera sebelumnya">‹</button> <button id="dNext" aria-label="Kamera berikutnya">›</button> <button id="dX">Tutup</button></span></div>
   <video id="dV" muted playsinline controls></video>
 </dialog>
 
@@ -315,12 +315,66 @@ function openCam(i){
   if(dh)dh.destroy();$('dT').textContent=label(i);
   dh=attach(dV,url(i),()=>{$('dT').textContent='Kamera '+i+' – stream gagal dimuat'});
   if(!dlg.open)dlg.showModal();
+  recStart();
 }
+// ===== CUPLIKAN UNTUK DIBAGIKAN (rekam beberapa detik terakhir dari kamera yang diperbesar) =====
+const MIME=(()=>{if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)return'';
+  for(const m of['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'])try{if(MediaRecorder.isTypeSupported(m))return m}catch(e){}return''})();
+const CLIP=5000,rec={rs:[],raf:0,timer:0,t2:0,cv:null,mk:null};
+const stamp=()=>new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+function frame(cv,ctx){
+  const w=dV.videoWidth||1280,h=dV.videoHeight||720,W=Math.min(960,w),H=Math.round(W*h/w);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
+  if(dV.readyState>=2)ctx.drawImage(dV,0,0,W,H);
+  ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H-34,W,34);
+  ctx.fillStyle='#fff';ctx.font='600 17px Inter,sans-serif';ctx.textBaseline='middle';
+  ctx.textAlign='left';ctx.fillText(label(cur),10,H-17);ctx.textAlign='right';ctx.fillText(stamp(),W-10,H-17);
+}
+function recStop(){cancelAnimationFrame(rec.raf);clearInterval(rec.timer);clearTimeout(rec.t2);
+  for(const r of rec.rs)if(r)try{r.mr.onstop=null;r.mr.stop()}catch(e){}rec.rs=[];rec.mk=null}
+function recStart(){
+  recStop();$('dMsg').textContent='';if(!MIME||LITE)return;
+  const cv=rec.cv=document.createElement('canvas'),ctx=cv.getContext('2d');cv.width=960;cv.height=540;
+  let last=0;const draw=t=>{rec.raf=requestAnimationFrame(draw);if(t-last<66)return;last=t;frame(cv,ctx)};draw(0);
+  const stream=cv.captureStream(15);
+  rec.mk=()=>{const r={t:performance.now(),ch:[],mr:new MediaRecorder(stream,{mimeType:MIME,videoBitsPerSecond:1500000})};
+    r.mr.ondataavailable=e=>{if(e.data&&e.data.size)r.ch.push(e.data)};r.mr.start(500);return r};
+  // dua perekam bergantian, masing-masing diulang tiap 2×CLIP, supaya selalu ada satu yang berisi ≥ CLIP detik terakhir
+  rec.rs=[rec.mk()];rec.t2=setTimeout(()=>{if(rec.mk)rec.rs[1]=rec.mk()},CLIP);
+  rec.timer=setInterval(()=>{const now=performance.now();rec.rs.forEach((r,k)=>{if(r&&now-r.t>=2*CLIP){try{r.mr.stop()}catch(e){}rec.rs[k]=rec.mk()}})},250);
+}
+const fname=ext=>('cctv-'+label(cur)+'-'+new Date().toISOString().slice(0,19)).replace(/[^\w-]+/g,'_')+'.'+ext;
+async function give(blob,name,text){
+  const file=new File([blob],name,{type:blob.type});
+  if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],text});$('dMsg').textContent='Terkirim ke menu bagikan ✓';return}catch(e){if(e.name==='AbortError'){$('dMsg').textContent='';return}}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+  $('dMsg').textContent='Tersimpan di unduhan. Lampirkan file itu di WhatsApp.';
+}
+$('dShare').onclick=async()=>{
+  const text=label(cur)+' · '+stamp()+' · Pantau CCTV';
+  const now=performance.now(),rs=rec.rs.filter(Boolean);
+  if(!rs.length){ // tidak bisa merekam: bagikan foto layar
+    if(dV.readyState<2){$('dMsg').textContent='Video belum tampil.';return}
+    const cv=document.createElement('canvas');frame(cv,cv.getContext('2d'));
+    cv.toBlob(b=>b?give(b,fname('jpg'),text):($('dMsg').textContent='Gagal mengambil gambar.'),'image/jpeg',.9);return}
+  // pilih perekam terlama (berisi CLIP–2×CLIP detik terakhir)
+  const r=rs.reduce((a,b)=>a.t<b.t?a:b);
+  if(now-r.t<2000||dV.readyState<2){$('dMsg').textContent='Tunggu beberapa detik, video baru mulai direkam…';return}
+  $('dMsg').textContent='Menyiapkan video…';
+  const k=rec.rs.indexOf(r);
+  const blob=await new Promise(res=>{r.mr.onstop=()=>res(new Blob(r.ch,{type:MIME.split(';')[0]}));try{r.mr.stop()}catch(e){res(null)}});
+  if(rec.mk)rec.rs[k]=rec.mk();
+  if(!blob||!blob.size){$('dMsg').textContent='Gagal merekam.';return}
+  await give(blob,fname(MIME.indexOf('mp4')>=0?'mp4':'webm'),text);
+  if(MIME.indexOf('mp4')<0)$('dMsg').textContent+=' (format WebM: WhatsApp mungkin menolak, buka di browser Chrome terbaru untuk MP4)';
+};
 function step(d){
   const list=urut.filter(c=>c.status==='on'&&!c.el.hidden).map(c=>c.i);if(!list.length)return;
   const k=list.indexOf(cur);openCam(list[(k+d+list.length)%list.length]);
 }
-dlg.addEventListener('close',()=>{if(dh){dh.destroy();dh=null}dV.removeAttribute('src');dV.load();paused=tOn;schedule()});
+dlg.addEventListener('close',()=>{recStop();if(dh){dh.destroy();dh=null}dV.removeAttribute('src');dV.load();paused=tOn;schedule()});
 $('dX').onclick=()=>dlg.close();$('dPrev').onclick=()=>step(-1);$('dNext').onclick=()=>step(1);
 dlg.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')step(-1);if(e.key==='ArrowRight')step(1)});
 grid.addEventListener('click',e=>{
