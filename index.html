@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pantau CCTV Palembang</title>
+<title>Pemantauan CCTV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -30,7 +30,7 @@ button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var
 :focus-visible{outline:3px solid var(--hot);outline-offset:2px}
 input{width:150px}
 label.inl{display:flex;gap:8px;align-items:center;color:var(--mute);font-size:15px}
-main{padding:10px max(2vw,12px) 40px}
+main{padding:6px max(2vw,12px) 40px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
 .cam{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
 .cam[hidden]{display:none}
@@ -122,6 +122,10 @@ body.touring #tour{padding-top:54px}
 #tkWx{font:600 12px Inter,sans-serif;transition:opacity .4s}
 #tkWx small{font:inherit;opacity:.85}
 @media(max-width:600px){#tkDate{font-size:11px}#tkWx{font-size:11px}.tick .tleft{padding:0 8px}}
+.hreg{color:var(--hot);font-weight:500}
+.hreg:not(:empty)::before{content:" · ";color:var(--mute)}
+.reg{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+section.rg+section.rg{margin-top:18px!important}
 #gate{position:fixed;top:0;right:0;bottom:0;left:0;z-index:100;background:#06222e;color:#e6f4f9;display:grid;place-items:center;padding:20px}
 #gate[hidden]{display:none}
 #gate form{width:min(100%,360px);display:flex;flex-direction:column;gap:12px}
@@ -145,7 +149,7 @@ footer a{color:inherit}
 </head>
 <body class="locked">
 <div id="gate"><form id="gForm" autocomplete="off">
-  <h2>Pantau CCTV Palembang</h2>
+  <h2>Pemantauan CCTV</h2>
   <p>Masukkan kata sandi untuk masuk.</p>
   <input id="gPw" type="password" aria-label="Kata sandi" placeholder="Kata sandi" required>
   <label class="inl" style="color:#8fb3c0"><input id="gKeep" type="checkbox" checked style="width:auto;min-height:0"> Ingat di perangkat ini</label>
@@ -154,7 +158,7 @@ footer a{color:inherit}
 </form></div>
 <header>
   <div>
-    <h1 title="Rangkuman kamera publik Kota Palembang dan Kabupaten Banyuasin. Klik kamera untuk memperbesar.">Pantau CCTV Palembang</h1>
+    <h1 title="Rangkuman kamera publik Kota Palembang dan Kabupaten Banyuasin. Klik kamera untuk memperbesar.">Pemantauan CCTV<span id="hReg" class="hreg"></span></h1>
     <p class="sub">Rangkuman kamera publik Kota Palembang dan Kabupaten Banyuasin dalam satu halaman. Klik kamera untuk memperbesar.</p>
   </div>
   <div class="stats" aria-live="polite">
@@ -545,6 +549,7 @@ $('gridB').innerHTML=Object.keys(BANYUASIN).map(i=>`<article class="cam"><div cl
 <div class="meta"><span class="nm"><small>Banyuasin · Cam ${i}</small> <span class="loc${BANYUASIN[i]?'':' ph'}">${esc(BANYUASIN[i]||'Lokasi belum diberi nama')}</span></span></div></article>`).join('');
 let wil='all';try{wil=localStorage.getItem('cctvWil')||'all'}catch(e){}
 function setW(w){wil=w;try{localStorage.setItem('cctvWil',w)}catch(e){}
+  $('hReg').textContent=w==='plg'?'Kota Palembang':w==='bya'?'Kabupaten Banyuasin':'Kota Palembang & Kabupaten Banyuasin';
   $('rPlg').hidden=w==='bya';$('rBya').hidden=w==='plg';
   for(const [b,v] of [['wAll','all'],['wPlg','plg'],['wBya','bya']])$(b).setAttribute('aria-pressed',w===v);
   if(w==='bya')for(const c of urut)c.visible=false;schedule()}
