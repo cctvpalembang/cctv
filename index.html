@@ -79,11 +79,28 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .tbar .sp{flex:1}
 @media(max-width:700px),(orientation:portrait){#tour{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 110px auto}.tside{flex-direction:row}.tside .tq{display:none}}
 @media(prefers-reduced-motion:reduce){.tprog{transition:none!important}}
+#gate{position:fixed;inset:0;z-index:100;background:#06222e;color:#e6f4f9;display:grid;place-items:center;padding:20px}
+#gate[hidden]{display:none}
+#gate form{width:min(100%,360px);display:flex;flex-direction:column;gap:12px}
+#gate h2{font:700 30px/1.1 "Space Grotesk",sans-serif;margin:0}
+#gate p{margin:0;color:#8fb3c0;font-size:15px}
+#gate input{width:100%;background:#0b3040;color:#fff;border-color:#174556}
+#gate button{background:#ff2e7e;color:#fff;border-color:#ff2e7e}
+#gErr{color:#ff8fb5;min-height:1.4em}
+body.locked>*:not(#gate){visibility:hidden}
 footer{padding:0 max(4vw,16px) 32px;color:var(--mute);font-size:13px}
 footer a{color:inherit}
 </style>
 </head>
-<body>
+<body class="locked">
+<div id="gate"><form id="gForm" autocomplete="off">
+  <h2>Pantau CCTV Palembang</h2>
+  <p>Masukkan kata sandi untuk masuk.</p>
+  <input id="gPw" type="password" aria-label="Kata sandi" placeholder="Kata sandi" required>
+  <label class="inl" style="color:#8fb3c0"><input id="gKeep" type="checkbox" checked style="width:auto;min-height:0"> Ingat di perangkat ini</label>
+  <button type="submit">Masuk</button>
+  <p id="gErr" aria-live="polite"></p>
+</form></div>
 <header>
   <div>
     <h1>Pantau CCTV Palembang</h1>
@@ -105,6 +122,7 @@ footer a{color:inherit}
     <select id="max"><option>4</option><option selected>6</option><option>9</option><option>12</option><option>20</option></select>
   </label>
   <button id="re">Cek ulang status</button>
+  <button id="logout">Keluar akun</button>
   <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
 </div>
 <main><div class="grid" id="grid"></div></main>
@@ -341,7 +359,19 @@ $('q').oninput=apply;
 $('max').onchange=()=>{try{localStorage.setItem('cctvMax',$('max').value)}catch(e){}schedule()};
 $('re').onclick=probeAll;
 document.addEventListener('visibilitychange',()=>{paused=document.hidden||dlg.open||tOn;schedule()});
-apply();probeAll();
+// ===== KATA SANDI (disimpan sebagai hash SHA-256, bukan teks asli) =====
+const PW_HASH='cb9d6474b7f197857cfc7bc9cef737655c8cc3cd25bc586936d20c3cd90c574f';
+const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('cctv-plg:'+t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+let started=false;
+function unlock(){document.body.classList.remove('locked');$('gate').hidden=true;if(!started){started=true;apply();probeAll()}}
+let tok='';try{tok=localStorage.getItem('cctvAuth')||sessionStorage.getItem('cctvAuth')||''}catch(e){}
+if(tok===PW_HASH)unlock();else $('gPw').focus();
+$('gForm').addEventListener('submit',async e=>{e.preventDefault();
+  const h=await sha($('gPw').value);
+  if(h===PW_HASH){try{($('gKeep').checked?localStorage:sessionStorage).setItem('cctvAuth',h)}catch(e){}unlock()}
+  else{$('gErr').textContent='Kata sandi salah.';$('gPw').select()}
+});
+$('logout').onclick=()=>{try{localStorage.removeItem('cctvAuth');sessionStorage.removeItem('cctvAuth')}catch(e){}location.reload()};
 }
 </script>
 </body>
