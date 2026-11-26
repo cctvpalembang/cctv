@@ -92,12 +92,6 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .tc.fresh::after{content:"BARU";position:absolute;top:8px;left:8px;background:var(--hot);color:#fff;font:700 11px Inter,sans-serif;padding:3px 6px;border-radius:5px}
 #tClk2{color:#8fb3c0;font-size:14px}
 #tour[data-mode="1"] #tClk2{display:none}
-.scr img,.tmain img,.tth img,.tc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.tmain img{object-fit:contain;background:#000}
-.scr img[hidden]{display:none}
-.msg a{color:#ff8fb5;pointer-events:auto}
-dialog img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#000}
-dialog [hidden]{display:none}
 #gate{position:fixed;inset:0;z-index:100;background:#06222e;color:#e6f4f9;display:grid;place-items:center;padding:20px}
 #gate[hidden]{display:none}
 #gate form{width:min(100%,360px);display:flex;flex-direction:column;gap:12px}
@@ -155,7 +149,7 @@ footer a{color:inherit}
 </div>
 <main>
 <section class="rg" id="rPlg"><h2 class="reg">Kota Palembang</h2><div class="grid" id="grid"></div></section>
-<section class="rg" id="rBya"><h2 class="reg">Kabupaten Banyuasin <small>gambar langsung dari situs resmi</small></h2><div class="grid" id="gridB"></div></section>
+<section class="rg" id="rBya"><h2 class="reg">Kabupaten Banyuasin <small>dibuka di situs resmi (tab baru)</small></h2><div class="grid" id="gridB"></div></section>
 </main>
 <footer>Halaman tidak resmi, bukan situs Pemerintah Kota Palembang maupun Kabupaten Banyuasin. Video Palembang diputar langsung dari stream.palembang.go.id; kamera Banyuasin dibuka di cctv.banyuasinkab.go.id karena situs itu tidak mengizinkan diputar dari situs lain; ketersediaan tergantung server sumber. Hanya kamera yang terlihat di layar yang diputar, agar hemat kuota.</footer>
 
@@ -183,7 +177,7 @@ footer a{color:inherit}
 
 <dialog id="dlg">
   <div class="dh"><span id="dT">Kamera</span><span><button id="dPrev" aria-label="Kamera sebelumnya">‹</button> <button id="dNext" aria-label="Kamera berikutnya">›</button> <button id="dX">Tutup</button></span></div>
-  <video id="dV" muted playsinline controls></video><img id="dI" alt="" hidden>
+  <video id="dV" muted playsinline controls></video>
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
@@ -217,10 +211,7 @@ for(const h of SEMBUNYI){const k=ord.indexOf(h);if(k>=0)ord.splice(k,1)}
 const urut=ord.map(i=>cams[i-1]);
 let filter='on',saved={};
 try{saved=JSON.parse(localStorage.getItem('cctvNama')||'{}')}catch(e){}
-let bc=[];
-const isB=i=>typeof i==='string';
-const nama=i=>isB(i)?(BANYUASIN[i.slice(1)]||''):(saved[i]||LOKASI[i]||'');
-const cn=i=>isB(i)?'Banyuasin · Cam '+i.slice(1):'Cam '+i;
+const nama=i=>saved[i]||LOKASI[i]||'';
 const esc=t=>String(t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 try{filter=localStorage.getItem('cctvFilter')||'on';$('max').value=localStorage.getItem('cctvMax')||'6'}catch(e){}
 
@@ -228,7 +219,7 @@ grid.innerHTML=urut.map(c=>`<article class="cam" id="c${c.i}" data-i="${c.i}">
 <div class="scr" tabindex="0" role="button" aria-label="Perbesar kamera ${c.i}"><video muted playsinline></video><div class="msg">Memeriksa…</div></div>
 <div class="meta"><span class="nm"><small>Cam ${c.i}</small> <span class="loc">${esc(nama(c.i)||'Lokasi belum diberi nama')}</span></span><span class="r"><span class="dot">cek</span><button class="ed" aria-label="Ubah nama lokasi kamera ${c.i}" title="Ubah nama lokasi">✎</button></span></div></article>`).join('');
 for(const c of urut){c.el=$('c'+c.i);c.v=c.el.querySelector('video');c.m=c.el.querySelector('.msg');c.d=c.el.querySelector('.dot');c.l=c.el.querySelector('.loc');c.l.classList.toggle('ph',!nama(c.i))}
-const label=i=>cn(i)+(nama(i)?' · '+nama(i):'');
+const label=i=>'Cam '+i+(nama(i)?' · '+nama(i):'');
 
 function setStatus(c,s,txt){
   c.status=s;c.el.classList.toggle('on',s==='on');c.el.classList.toggle('off',s==='off');
@@ -251,8 +242,8 @@ async function probeAll(){
   counts();apply();
 }
 function counts(){
-  $('nOn').textContent=urut.filter(c=>c.status==='on').length+bc.filter(b=>b.status==='on').length;
-  $('nOff').textContent=urut.filter(c=>c.status==='off').length+bc.filter(b=>b.status==='off').length;
+  $('nOn').textContent=urut.filter(c=>c.status==='on').length;
+  $('nOff').textContent=urut.filter(c=>c.status==='off').length;
   $('nPlay').textContent=urut.filter(c=>c.hls).length;
 }
 function apply(){
@@ -296,27 +287,24 @@ function schedule(){
   for(const c of urut)if(c.hls&&!want.includes(c))stop(c);
   for(const c of want)start(c);
   for(const c of urut)if(c.status==='on'&&!c.hls&&c.visible&&!c.el.hidden)c.m.textContent='Batas putar tercapai – scroll, atau klik untuk memperbesar';
-  bSchedule();
 }
 const io=new IntersectionObserver(es=>{for(const e of es)cams[+e.target.dataset.i-1].visible=e.isIntersecting;schedule()},{rootMargin:'100px'});
 urut.forEach(c=>io.observe(c.el));
 
 // modal
-const dlg=$('dlg'),dV=$('dV'),dI=$('dI');let dh=null,cur=0;
+const dlg=$('dlg'),dV=$('dV');let dh=null,cur=0;
 function openCam(i){
-  const c=isB(i)?bc.find(b=>'b'+b.i===i):cams[i-1];if(!c||c.status==='off')return;
+  const c=cams[i-1];if(c.status==='off')return;
   cur=i;paused=true;schedule();
-  if(dh){dh.destroy();dh=null}$('dT').textContent=label(i);
-  dV.hidden=isB(i);dI.hidden=!isB(i);
-  if(isB(i))dI.src=bUrl(i.slice(1));
-  else{dI.removeAttribute('src');dh=attach(dV,url(i),()=>{$('dT').textContent='Kamera '+i+' – stream gagal dimuat'})}
+  if(dh)dh.destroy();$('dT').textContent=label(i);
+  dh=attach(dV,url(i),()=>{$('dT').textContent='Kamera '+i+' – stream gagal dimuat'});
   if(!dlg.open)dlg.showModal();
 }
 function step(d){
-  const list=isB(cur)?bc.filter(b=>b.status==='on').map(b=>'b'+b.i):urut.filter(c=>c.status==='on'&&!c.el.hidden).map(c=>c.i);if(!list.length)return;
+  const list=urut.filter(c=>c.status==='on'&&!c.el.hidden).map(c=>c.i);if(!list.length)return;
   const k=list.indexOf(cur);openCam(list[(k+d+list.length)%list.length]);
 }
-dlg.addEventListener('close',()=>{dI.removeAttribute('src');if(dh){dh.destroy();dh=null}dV.removeAttribute('src');dV.load();paused=tOn;schedule()});
+dlg.addEventListener('close',()=>{if(dh){dh.destroy();dh=null}dV.removeAttribute('src');dV.load();paused=tOn;schedule()});
 $('dX').onclick=()=>dlg.close();$('dPrev').onclick=()=>step(-1);$('dNext').onclick=()=>step(1);
 dlg.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')step(-1);if(e.key==='ArrowRight')step(1)});
 grid.addEventListener('click',e=>{
@@ -346,7 +334,6 @@ let tList=[],tPos=0,tTimer=null,tStart=0,tRun=true,tOn=false;const pool=new Map(
 const tSec=()=>+$('tInt').value;
 function tVideo(i){
   if(pool.has(i))return pool.get(i);
-  if(isB(i)){const v=document.createElement('img');v.alt='';v.src=bUrl(i.slice(1));const e={v,h:{destroy(){v.removeAttribute('src')}}};pool.set(i,e);return e}
   const v=document.createElement('video');v.muted=true;v.playsInline=true;v.autoplay=true;
   const e={v,h:null};e.h=attach(v,url(i),()=>{});pool.set(i,e);return e;
 }
@@ -360,7 +347,7 @@ function tRenderWall(){
   tWall.replaceChildren(...ids.map((i,k)=>{const d=document.createElement('div');d.className='tc'+(k===tFresh?' fresh':'');d.title='Sorot kamera ini';
     d.append(tVideo(i).v);const sp=document.createElement('span');sp.textContent=label(i);d.append(sp);
     d.onclick=()=>{tPos=tList.indexOf(i);setTMode('1')};return d}));
-  for(const e of pool.values())e.v.play&&e.v.play().catch(()=>{});
+  for(const e of pool.values())e.v.play().catch(()=>{});
   $('tPos').textContent=tMode==='2'?'Halaman '+(Math.floor(tPos/4)+1)+' / '+Math.ceil(n/4):n+' kamera · 1 berganti tiap giliran';
   tKick();
 }
@@ -373,10 +360,10 @@ function tRender(){
   const n=tList.length,want=[0,1,2,3].slice(0,Math.min(4,n)).map(k=>tList[(tPos+k)%n]);
   for(const [i,e] of pool)if(!want.includes(i)){e.h&&e.h.destroy();e.v.remove();pool.delete(i)}
   const m=tVideo(want[0]);tMain.prepend(m.v);
-  ths.forEach((t,k)=>{const i=want[k+1];t.querySelectorAll('video,img,span').forEach(x=>x.remove());t.hidden=i==null||i===want[0];
-    if(t.hidden)return;const e=tVideo(i);t.append(e.v);const sp=document.createElement('span');sp.textContent=label(i);t.append(sp);t.dataset.k=k+1});
-  for(const e of pool.values())e.v.play&&e.v.play().catch(()=>{});
-  $('tNo').textContent=cn(want[0]);$('tName').textContent=nama(want[0])||'Lokasi belum diberi nama';
+  ths.forEach((t,k)=>{const i=want[k+1];t.querySelectorAll('video,span').forEach(x=>x.remove());t.hidden=i==null||i===want[0];
+    if(t.hidden)return;const e=tVideo(i);t.append(e.v);const sp=document.createElement('span');sp.textContent='Cam '+i+(nama(i)?' · '+nama(i):'');t.append(sp);t.dataset.k=k+1});
+  for(const e of pool.values())e.v.play().catch(()=>{});
+  $('tNo').textContent='Cam '+want[0];$('tName').textContent=nama(want[0])||'Lokasi belum diberi nama';
   $('tPos').textContent=(tPos+1)+' / '+n;
   tKick();
 }
@@ -392,7 +379,7 @@ function tGo(d){if(!tList.length)return;const n=tList.length;
 function tClock(){$('tClk2').textContent=$('tClock').textContent=new Date().toLocaleString('id-ID',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 let clk=null;
 function tourOpen(){
-  tList=[...(wil!=='bya'?urut.filter(c=>c.status==='on').map(c=>c.i):[]),...(wil!=='plg'?bc.filter(b=>b.status==='on').map(b=>'b'+b.i):[])];tPos=0;tOn=true;tWallIds=[];tRun=true;$('tPlay').textContent='⏸ Jeda';
+  tList=urut.filter(c=>c.status==='on').map(c=>c.i);tPos=0;tOn=true;tWallIds=[];tRun=true;$('tPlay').textContent='⏸ Jeda';
   paused=true;schedule();tour.hidden=false;document.body.style.overflow='hidden';
   tClock();clk=setInterval(tClock,1000);tRender();
   if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
@@ -404,7 +391,7 @@ function tourClose(){
   if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
   paused=false;schedule();
 }
-$('tourBtn').onclick=()=>{if(urut.some(c=>c.status==='cek')||bc.some(b=>b.status==='cek')){$('tourBtn').textContent='Tunggu cek status…';setTimeout(()=>$('tourBtn').textContent='▶ Mode Tur',1500);return}tourOpen()};
+$('tourBtn').onclick=()=>{if(urut.some(c=>c.status==='cek')){$('tourBtn').textContent='Tunggu cek status…';setTimeout(()=>$('tourBtn').textContent='▶ Mode Tur',1500);return}tourOpen()};
 $('tX').onclick=tourClose;$('tMode').onchange=()=>setTMode($('tMode').value);$('tPrev').onclick=()=>tGo(-1);$('tNext').onclick=()=>tGo(1);
 $('tPlay').onclick=()=>{tRun=!tRun;$('tPlay').textContent=tRun?'⏸ Jeda':'▶ Lanjut';tKick()};
 $('tInt').onchange=()=>{try{localStorage.setItem('cctvInt',$('tInt').value)}catch(e){}tKick()};
@@ -419,29 +406,13 @@ const setF=f=>{filter=f;try{localStorage.setItem('cctvFilter',f)}catch(e){}apply
 $('fOn').onclick=()=>setF('on');$('fAll').onclick=()=>setF('all');$('fOff').onclick=()=>setF('off');
 $('q').oninput=apply;
 $('max').onchange=()=>{try{localStorage.setItem('cctvMax',$('max').value)}catch(e){}schedule()};
-$('re').onclick=()=>{probeAll();bProbeAll()};
+$('re').onclick=probeAll;
 document.addEventListener('visibilitychange',()=>{paused=document.hidden||dlg.open||tOn;schedule()});
 // ===== CCTV BANYUASIN: nomor kamera dan nama lokasinya (nomor: "nama") =====
 const BANYUASIN={1:"",2:"",4:"",5:"",6:"",7:"",8:"",9:"",10:"",11:"",12:"",13:"",14:""};
 const bUrl=i=>`https://cctv.banyuasinkab.go.id/stream/${i}`;
-$('gridB').innerHTML=Object.keys(BANYUASIN).map(i=>`<article class="cam" id="b${i}" data-b="${i}"><div class="scr" tabindex="0" role="button" aria-label="Perbesar kamera Banyuasin ${i}"><img alt="" hidden><div class="msg">Memeriksa…</div></div>
-<div class="meta"><span class="nm"><small>Banyuasin · Cam ${i}</small> <span class="loc${BANYUASIN[i]?'':' ph'}">${esc(BANYUASIN[i]||'Lokasi belum diberi nama')}</span></span><span class="r"><span class="dot">cek</span><a class="ed" href="${bUrl(i)}" target="_blank" rel="noopener" title="Buka di situs resmi" aria-label="Buka kamera Banyuasin ${i} di situs resmi">↗</a></span></div></article>`).join('');
-bc=Object.keys(BANYUASIN).map(i=>{const el=$('b'+i);return{i,el,img:el.querySelector('img'),m:el.querySelector('.msg'),d:el.querySelector('.dot'),l:el.querySelector('.loc'),status:'cek',visible:false,on:false}});
-function bSet(b,st){b.status=st;b.el.classList.toggle('on',st==='on');b.el.classList.toggle('off',st==='off');b.d.textContent=st==='on'?'online':st==='off'?'offline':'cek';
-  if(st==='off'){b.m.innerHTML='Gambar diblokir situs sumber.<br><a href="'+bUrl(b.i)+'" target="_blank" rel="noopener">Buka situs resmi ↗</a> sekali untuk verifikasi, lalu tekan "Cek ulang status".';b.m.hidden=false;b.img.hidden=true}
-  counts()}
-function bStart(b){if(b.on)return;b.on=true;b.img.onload=()=>{if(!b.on)return;b.img.hidden=false;b.m.hidden=true;b.el.classList.add('live');if(b.status!=='on')bSet(b,'on')};
-  b.img.onerror=()=>{if(!b.on)return;bStop(b);bSet(b,'off')};b.m.hidden=false;b.m.textContent='Memuat…';b.img.src=bUrl(b.i)}
-function bStop(b){if(!b.on)return;b.on=false;b.img.removeAttribute('src');b.img.hidden=true;b.el.classList.remove('live');if(b.status==='on'){b.m.hidden=false;b.m.textContent='Dijeda'}}
-function bSchedule(){const show=!$('rBya').hidden;for(const b of bc){if(!paused&&show&&b.visible&&b.status!=='off')bStart(b);else bStop(b)}}
-function bProbe(b){return new Promise(r=>{let done=false;const im=new Image();const fin=ok=>{if(done)return;done=true;clearTimeout(t);im.onload=im.onerror=null;im.removeAttribute('src');if(b.status!=='on'||!ok)bSet(b,ok?'on':'off');r()};
-  const t=setTimeout(()=>fin(false),15000);im.onload=()=>fin(true);im.onerror=()=>fin(false);im.src=bUrl(b.i)+(b.status==='off'?'?r='+Date.now():'')})}
-async function bProbeAll(){for(const b of bc){bStop(b);b.status='cek';b.d.textContent='cek';b.m.hidden=false;b.m.textContent='Memeriksa…'}
-  await Promise.all(bc.map(bProbe));bSchedule()}
-const bio=new IntersectionObserver(es=>{for(const e of es)bc.find(b=>b.el===e.target).visible=e.isIntersecting;bSchedule()},{rootMargin:'100px'});
-bc.forEach(b=>bio.observe(b.el));
-$('gridB').addEventListener('click',e=>{if(e.target.closest('a'))return;const s=e.target.closest('.scr');if(s)openCam('b'+s.parentNode.dataset.b)});
-$('gridB').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.scr')){e.preventDefault();openCam('b'+e.target.parentNode.dataset.b)}});
+$('gridB').innerHTML=Object.keys(BANYUASIN).map(i=>`<article class="cam"><div class="scr"><a class="lk" href="${bUrl(i)}" target="_blank" rel="noopener"><span>▶ Buka kamera ${i} ↗</span></a></div>
+<div class="meta"><span class="nm"><small>Banyuasin · Cam ${i}</small> <span class="loc${BANYUASIN[i]?'':' ph'}">${esc(BANYUASIN[i]||'Lokasi belum diberi nama')}</span></span></div></article>`).join('');
 let wil='all';try{wil=localStorage.getItem('cctvWil')||'all'}catch(e){}
 function setW(w){wil=w;try{localStorage.setItem('cctvWil',w)}catch(e){}
   $('rPlg').hidden=w==='bya';$('rBya').hidden=w==='plg';
@@ -453,7 +424,7 @@ setW(wil);
 const PW_HASH='cb9d6474b7f197857cfc7bc9cef737655c8cc3cd25bc586936d20c3cd90c574f';
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('cctv-plg:'+t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
 let started=false;
-function unlock(){document.body.classList.remove('locked');$('gate').hidden=true;if(!started){started=true;apply();probeAll();bProbeAll()}}
+function unlock(){document.body.classList.remove('locked');$('gate').hidden=true;if(!started){started=true;apply();probeAll()}}
 let tok='';try{tok=localStorage.getItem('cctvAuth')||sessionStorage.getItem('cctvAuth')||''}catch(e){}
 if(tok===PW_HASH)unlock();else $('gPw').focus();
 $('gForm').addEventListener('submit',async e=>{e.preventDefault();
