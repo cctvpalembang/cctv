@@ -145,6 +145,15 @@ a.lk span{border:1px solid #174556;border-radius:10px;padding:10px 14px;backgrou
 a.lk:hover span,a.lk:focus-visible span{border-color:var(--hot)}
 footer{padding:0 max(4vw,16px) 32px;color:var(--mute);font-size:13px}
 footer a{color:inherit}
+/* pita: baris 1 tanggal · cuaca, baris 2 berita selebar penuh */
+.tick{flex-direction:column;height:auto!important}
+.tick .tleft{flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;height:28px;padding:0 12px}
+.tick .tleft .sp{flex:1}
+.tick .tleft .tsep{opacity:.7}
+.tick .tleft .tsrc{background:none;color:#fff;opacity:.85;padding:0;font-size:11px}
+#tkDate{font-size:14px}#tkWx{font-size:13px}
+.tick .tvw{height:34px;flex:none;width:100%}
+@media(max-width:600px){.tick .tleft .tsrc{display:none}#tkDate,#tkWx{font-size:11px}}
 </style>
 </head>
 <body class="locked">
@@ -183,7 +192,7 @@ footer a{color:inherit}
   <button id="logout">Keluar akun</button>
   <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
   </div></details>
-  <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tleft"><div id="tkDate">–</div><div id="tkWx" aria-live="off">Memuat cuaca…</div></div><div class="tsrc" id="tkSrc"></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
+  <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tleft"><div id="tkDate">–</div><span class="tsep">·</span><div id="tkWx" aria-live="off">Memuat cuaca…</div><span class="sp"></span><div class="tsrc" id="tkSrc"></div></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
 </div>
 <main>
 <section class="rg" id="rPlg"><h2 class="reg">Kota Palembang</h2><div class="grid" id="grid"></div></section>
