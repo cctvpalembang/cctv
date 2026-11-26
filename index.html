@@ -180,7 +180,7 @@ footer a{color:inherit}
 </section>
 
 <dialog id="dlg">
-  <div class="dh"><span id="dT">Kamera</span><span><span id="dMsg" aria-live="polite" style="font:500 13px Inter,sans-serif;color:#8fb3c0"></span> <button id="dShare" style="background:#18a36b;border-color:#18a36b" title="Kirim cuplikan beberapa detik terakhir, misalnya ke WhatsApp">📤 Bagikan 5 detik</button> <button id="dPrev" aria-label="Kamera sebelumnya">‹</button> <button id="dNext" aria-label="Kamera berikutnya">›</button> <button id="dX">Tutup</button></span></div>
+  <div class="dh"><span id="dT">Kamera</span><span><span id="dMsg" aria-live="polite" style="font:500 13px Inter,sans-serif;color:#8fb3c0"></span> <button id="dShare" style="background:#18a36b;border-color:#18a36b" title="Kirim cuplikan beberapa detik terakhir, misalnya ke WhatsApp">📤 Bagikan ±6 detik</button> <button id="dPrev" aria-label="Kamera sebelumnya">‹</button> <button id="dNext" aria-label="Kamera berikutnya">›</button> <button id="dX">Tutup</button></span></div>
   <video id="dV" muted playsinline controls></video>
 </dialog>
 
@@ -271,7 +271,7 @@ function attach(video,src,onErr){
   const canNat=!!video.canPlayType&&video.canPlayType('application/vnd.apple.mpegurl')!=='';
   if(window.Hls&&Hls.isSupported()&&!(LITE&&canNat)){
     const h=new Hls({liveSyncDurationCount:2,maxBufferLength:LITE?6:10,enableWorker:!LITE,capLevelToPlayerSize:true});
-    const w={n:null,rec:0,dead:false,destroy(){this.dead=true;try{h.destroy()}catch(e){}if(this.n)this.n.destroy()}};
+    const w={h,n:null,rec:0,dead:false,destroy(){this.dead=true;try{h.destroy()}catch(e){}if(this.n)this.n.destroy()}};
     h.loadSource(src);h.attachMedia(video);
     h.on(Hls.Events.MANIFEST_PARSED,()=>pl(video));
     h.on(Hls.Events.ERROR,(_,d)=>{if(!d.fatal||w.dead)return;
@@ -315,12 +315,11 @@ function openCam(i){
   if(dh)dh.destroy();$('dT').textContent=label(i);
   dh=attach(dV,url(i),()=>{$('dT').textContent='Kamera '+i+' – stream gagal dimuat'});
   if(!dlg.open)dlg.showModal();
-  recStart();
+  clipStart();
 }
-// ===== CUPLIKAN UNTUK DIBAGIKAN (rekam beberapa detik terakhir dari kamera yang diperbesar) =====
-const MIME=(()=>{if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)return'';
-  for(const m of['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'])try{if(MediaRecorder.isTypeSupported(m))return m}catch(e){}return''})();
-const CLIP=5000,rec={rs:[],raf:0,timer:0,t2:0,cv:null,mk:null};
+// ===== CUPLIKAN UNTUK DIBAGIKAN =====
+// Diambil langsung dari potongan stream asli (segmen HLS ±6 detik yang sedang diputar), diubah ke MP4 di browser.
+// Tidak merekam ulang layar, jadi tidak ada frame hitam dan bisa juga di HP/TV yang lemah.
 const stamp=()=>new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 function frame(cv,ctx){
   const w=dV.videoWidth||1280,h=dV.videoHeight||720,W=Math.min(960,w),H=Math.round(W*h/w);
@@ -330,64 +329,82 @@ function frame(cv,ctx){
   ctx.fillStyle='#fff';ctx.font='600 17px Inter,sans-serif';ctx.textBaseline='middle';
   ctx.textAlign='left';ctx.fillText(label(cur),10,H-17);ctx.textAlign='right';ctx.fillText(stamp(),W-10,H-17);
 }
-function recStop(){cancelAnimationFrame(rec.raf);clearInterval(rec.timer);clearTimeout(rec.t2);
-  for(const r of rec.rs)if(r)try{r.mr.onstop=null;r.mr.stop()}catch(e){}rec.rs=[];rec.mk=null}
-function recStart(){
-  recStop();sbReset();if(!MIME||LITE)return;
-  const cv=rec.cv=document.createElement('canvas'),ctx=cv.getContext('2d');cv.width=960;cv.height=540;
-  let last=0;const draw=t=>{rec.raf=requestAnimationFrame(draw);if(t-last<66)return;last=t;frame(cv,ctx)};draw(0);
-  const stream=cv.captureStream(15);
-  rec.mk=()=>{const r={t:performance.now(),ch:[],mr:new MediaRecorder(stream,{mimeType:MIME,videoBitsPerSecond:1500000})};
-    r.mr.ondataavailable=e=>{if(e.data&&e.data.size)r.ch.push(e.data)};r.mr.start(500);return r};
-  // dua perekam bergantian, masing-masing diulang tiap 2×CLIP, supaya selalu ada satu yang berisi ≥ CLIP detik terakhir
-  rec.rs=[rec.mk()];rec.t2=setTimeout(()=>{if(rec.mk)rec.rs[1]=rec.mk()},CLIP);
-  rec.timer=setInterval(()=>{const now=performance.now();rec.rs.forEach((r,k)=>{if(r&&now-r.t>=2*CLIP){try{r.mr.stop()}catch(e){}rec.rs[k]=rec.mk()}})},250);
-}
 const fname=ext=>('cctv-'+label(cur)+'-'+new Date().toISOString().slice(0,19)).replace(/[^\w-]+/g,'_')+'.'+ext;
+let muxP=null;
+const loadMux=()=>muxP||(muxP=new Promise((res,rej)=>{if(window.muxjs)return res();const sc=document.createElement('script');
+  sc.src='https://cdn.jsdelivr.net/npm/mux.js@6.3.0/dist/mux.min.js';sc.onload=res;sc.onerror=()=>{muxP=null;rej(new Error('mux'))};document.head.append(sc)}));
+const clip={file:null,url:'',job:0,timer:0,cam:0};
+function testPlay(blob){return new Promise(res=>{const v=document.createElement('video');v.muted=true;v.playsInline=true;const u=URL.createObjectURL(blob);let done=false;
+  const end=ok=>{if(done)return;done=true;URL.revokeObjectURL(u);v.removeAttribute('src');try{v.load()}catch(e){}res(ok)};
+  v.onloadeddata=()=>end(v.videoWidth>0);v.onerror=()=>end(false);setTimeout(()=>end(false),8000);v.src=u})}
+async function buildClip(segUrl){
+  if(!segUrl||segUrl===clip.url)return;const job=++clip.job,cam=cur;
+  try{
+    await loadMux();
+    const r=await fetch(segUrl,{cache:'force-cache'});if(!r.ok)throw new Error('HTTP '+r.status);
+    const ts=new Uint8Array(await r.arrayBuffer());
+    const tx=new muxjs.mp4.Transmuxer();let init=null;const parts=[];
+    tx.on('data',sg=>{if(!init)init=sg.initSegment;parts.push(sg.data)});tx.push(ts);tx.flush();
+    if(!init||!parts.length)throw new Error('kosong');
+    const blob=new Blob([init].concat(parts),{type:'video/mp4'});
+    if(blob.size<20000)throw new Error('terlalu kecil');
+    if(!(await testPlay(blob)))throw new Error('tidak bisa diputar');
+    if(job!==clip.job||cam!==cur||!dlg.open)return;
+    clip.file=new File([blob],fname('mp4'),{type:'video/mp4'});clip.url=segUrl;
+    if(!busy&&!ready)sbSet(SB0,false,'Cuplikan siap ✓');
+  }catch(e){if(job===clip.job)clip.err=e.message}
+}
+async function pollSeg(){ // untuk pemutar HLS bawaan (tanpa hls.js): ambil segmen yang kira-kira sedang diputar
+  if(!dlg.open||isNaN(cur))return;if(dh&&dh.h&&!dh.n)return;
+  try{const base=url(cur),m=await (await fetch(base,{cache:'no-store'})).text();
+    const segs=m.split('\n').filter(x=>x&&x[0]!=='#');if(segs.length)buildClip(new URL(segs[Math.max(0,segs.length-3)],base).href)}catch(e){}
+}
+function clipStart(){
+  clipStop();sbReset();
+  if(dh&&dh.h)dh.h.on(Hls.Events.FRAG_CHANGED,(_,d)=>{if(d&&d.frag&&d.frag.url)buildClip(d.frag.url)});
+  clip.timer=setInterval(pollSeg,4000);setTimeout(pollSeg,1500);
+}
+function clipStop(){clearInterval(clip.timer);clip.job++;clip.file=null;clip.url='';clip.err=''}
 const SB=$('dShare'),SB0=SB.innerHTML;let ready=null,busy=false;
 function sbSet(html,dis,msg){SB.innerHTML=html;SB.disabled=!!dis;SB.style.opacity=dis?.7:1;if(msg!=null)$('dMsg').textContent=msg}
 function sbReset(){ready=null;busy=false;sbSet(SB0,false,'')}
 function download(f){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.append(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),60000)}
-const canFile=f=>!!(navigator.canShare&&navigator.share&&navigator.canShare({files:[f]}));
-// kirim berkas yang sudah siap; dipanggil langsung di dalam ketukan supaya menu bagikan pasti terbuka
-function send(f,text){
+const canFile=f=>{try{return !!(navigator.canShare&&navigator.share&&navigator.canShare({files:[f]}))}catch(e){return false}};
+// kirim berkas yang sudah siap; dipanggil langsung di dalam ketukan supaya menu bagikan terbuka
+function send(f,text,note){
   ready=null;
-  if(!canFile(f)){download(f);sbSet(SB0,false,'Tersimpan di unduhan. Lampirkan file itu di WhatsApp.');return}
-  navigator.share({files:[f],text}).then(()=>sbSet(SB0,false,'Terkirim ke menu bagikan ✓'),e=>{
-    if(e&&e.name==='NotAllowedError'){ready={f,text};sbSet('✅ Siap – ketuk untuk kirim',false,'Video siap. Ketuk sekali lagi untuk membuka WhatsApp.')}
+  if(!canFile(f)){download(f);sbSet(SB0,false,(note||'')+'Tersimpan di unduhan. Lampirkan file itu di WhatsApp.');return}
+  navigator.share({files:[f],text}).then(()=>sbSet(SB0,false,(note||'')+'Terkirim ke menu bagikan ✓'),e=>{
+    if(e&&e.name==='NotAllowedError'){ready={f,text};sbSet('✅ Siap – ketuk untuk kirim',false,'Ketuk sekali lagi untuk membuka WhatsApp.')}
     else sbSet(SB0,false,'')})
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function snapshot(text,note){
+  if(dV.readyState<2){sbSet(SB0,false,'Video belum tampil.');return}
+  const cv=document.createElement('canvas');frame(cv,cv.getContext('2d'));
+  const bl=await new Promise(r=>{try{cv.toBlob(r,'image/jpeg',.9)}catch(e){r(null)}});
+  if(!bl){sbSet(SB0,false,'Gagal mengambil gambar.');return}
+  send(new File([bl],fname('jpg'),{type:'image/jpeg'}),text,note)
+}
 SB.onclick=async()=>{
   if(ready){const x=ready;send(x.f,x.text);return}
-  if(busy)return;busy=true;
+  if(busy)return;
   const text=label(cur)+' · '+stamp()+' · Pantau CCTV';
+  if(clip.file){send(clip.file,text);return} // sudah disiapkan di latar belakang: langsung buka menu bagikan
+  busy=true;sbSet('⏳ Menyiapkan video…',true,'');
   try{
-    if(!rec.rs.filter(Boolean).length){ // tidak bisa merekam: bagikan foto layar
-      if(dV.readyState<2){sbSet(SB0,false,'Video belum tampil.');return}
-      const cv=document.createElement('canvas');frame(cv,cv.getContext('2d'));
-      const bl=await new Promise(r=>cv.toBlob(r,'image/jpeg',.9));
-      if(!bl){sbSet(SB0,false,'Gagal mengambil gambar.');return}
-      send(new File([bl],fname('jpg'),{type:'image/jpeg'}),text);return}
-    // kalau baru mulai, tunggu sampai minimal 3 detik terekam (tampilkan hitung mundur)
-    for(;;){const rs=rec.rs.filter(Boolean);if(!rs.length){sbSet(SB0,false,'');return}
-      const r=rs.reduce((a,b)=>a.t<b.t?a:b),left=Math.ceil((3000-(performance.now()-r.t))/1000);
-      if(left<=0&&dV.readyState>=2)break;sbSet('⏳ Merekam… '+Math.max(left,1),true,'Mengumpulkan beberapa detik video…');await wait(400)}
-    sbSet('⏳ Menyiapkan video…',true,'');
-    const rs=rec.rs.filter(Boolean),r=rs.reduce((a,b)=>a.t<b.t?a:b),k=rec.rs.indexOf(r);
-    const blob=await new Promise(res=>{r.mr.onstop=()=>res(new Blob(r.ch,{type:MIME.split(';')[0]}));try{r.mr.stop()}catch(e){res(null)}});
-    if(rec.mk)rec.rs[k]=rec.mk();
-    if(!blob||!blob.size){sbSet(SB0,false,'Gagal merekam.');return}
-    send(new File([blob],fname(MIME.indexOf('mp4')>=0?'mp4':'webm'),{type:blob.type}),text);
-    if(MIME.indexOf('mp4')<0)$('dMsg').textContent+=' (format WebM: WhatsApp mungkin menolak)';
+    const t0=Date.now();while(!clip.file&&Date.now()-t0<15000&&dlg.open)await wait(300);
+    if(!dlg.open)return;
+    if(clip.file)send(clip.file,text);
+    else await snapshot(text,'Video belum bisa disiapkan'+(clip.err?' ('+clip.err+')':'')+', jadi dikirim foto. ');
   }finally{busy=false}
 };
 function step(d){
   const list=urut.filter(c=>c.status==='on'&&!c.el.hidden).map(c=>c.i);if(!list.length)return;
   const k=list.indexOf(cur);openCam(list[(k+d+list.length)%list.length]);
 }
-dlg.addEventListener('close',()=>{recStop();if(dh){dh.destroy();dh=null}dV.removeAttribute('src');dV.load();paused=tOn;schedule()});
+dlg.addEventListener('close',()=>{clipStop();if(dh){dh.destroy();dh=null}dV.removeAttribute('src');dV.load();paused=tOn;schedule()});
 $('dX').onclick=()=>dlg.close();$('dPrev').onclick=()=>step(-1);$('dNext').onclick=()=>step(1);
 dlg.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')step(-1);if(e.key==='ArrowRight')step(1)});
 grid.addEventListener('click',e=>{
