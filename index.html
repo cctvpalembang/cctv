@@ -79,6 +79,19 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .tbar .sp{flex:1}
 @media(max-width:700px),(orientation:portrait){#tour{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 110px auto}.tside{flex-direction:row}.tside .tq{display:none}}
 @media(prefers-reduced-motion:reduce){.tprog{transition:none!important}}
+#tWall{display:none;grid-column:1/-1;gap:6px;min-height:0}
+#tour[data-mode="2"],#tour[data-mode="3"]{grid-template-rows:minmax(0,1fr) auto}
+#tour[data-mode="2"] .tmain,#tour[data-mode="2"] .tside,#tour[data-mode="3"] .tmain,#tour[data-mode="3"] .tside{display:none}
+#tour[data-mode="2"] #tWall{display:grid;grid-template:repeat(2,minmax(0,1fr))/repeat(2,minmax(0,1fr))}
+#tour[data-mode="3"] #tWall{display:grid;grid-template:repeat(3,minmax(0,1fr))/repeat(3,minmax(0,1fr))}
+.tc{position:relative;overflow:hidden;border-radius:10px;background:#021118;cursor:zoom-in;border:2px solid transparent}
+.tc:hover{border-color:#174556}
+.tc video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tc span{position:absolute;left:0;right:0;bottom:0;padding:18px 10px 6px;background:linear-gradient(transparent,rgba(0,0,0,.8));font:600 clamp(12px,1.1vw,16px)/1.25 Inter,sans-serif}
+.tc.fresh{border-color:var(--hot)}
+.tc.fresh::after{content:"BARU";position:absolute;top:8px;left:8px;background:var(--hot);color:#fff;font:700 11px Inter,sans-serif;padding:3px 6px;border-radius:5px}
+#tClk2{color:#8fb3c0;font-size:14px}
+#tour[data-mode="1"] #tClk2{display:none}
 #gate{position:fixed;inset:0;z-index:100;background:#06222e;color:#e6f4f9;display:grid;place-items:center;padding:20px}
 #gate[hidden]{display:none}
 #gate form{width:min(100%,360px);display:flex;flex-direction:column;gap:12px}
@@ -145,13 +158,17 @@ footer a{color:inherit}
     <div class="tcap"><div><small id="tNo">Cam</small><b id="tName">–</b></div><div class="tclock" id="tClock"></div></div>
     <div class="tprog" id="tProg"></div></div>
   <div class="tside"><p class="tq">Berikutnya</p><div class="tth" tabindex="0"></div><div class="tth" tabindex="0"></div><div class="tth" tabindex="0"></div></div>
+  <div id="tWall"></div>
   <div class="tbar">
     <button id="tPrev" aria-label="Kamera sebelumnya">‹ Sebelumnya</button>
     <button id="tPlay">⏸ Jeda</button>
     <button id="tNext" aria-label="Kamera berikutnya">Berikutnya ›</button>
     <label class="inl" for="tInt" style="color:#8fb3c0">Ganti tiap
       <select id="tInt"><option value="5">5 detik</option><option value="8" selected>8 detik</option><option value="15">15 detik</option><option value="30">30 detik</option><option value="60">60 detik</option></select></label>
+    <label class="inl" for="tMode" style="color:#8fb3c0">Tampilan
+      <select id="tMode"><option value="1">Sorot + 3 berikutnya</option><option value="2">Kuad 2×2 (ganti per halaman)</option><option value="3">Dinding 3×3 (bergulir)</option></select></label>
     <span class="sp"></span>
+    <span id="tClk2"></span>
     <span id="tPos" style="color:#8fb3c0;font-size:14px"></span>
     <button id="tFs">⛶ Layar penuh</button>
     <button id="tX">Keluar</button>
@@ -320,8 +337,26 @@ function tVideo(i){
   const v=document.createElement('video');v.muted=true;v.playsInline=true;v.autoplay=true;
   const e={v,h:null};e.h=attach(v,url(i),()=>{});pool.set(i,e);return e;
 }
+let tMode='1',tWallIds=[],tSlot=0,tFresh=-1;const tWall=$('tWall');
+try{tMode=localStorage.getItem('cctvTMode')||'1';$('tMode').value=tMode}catch(e){}
+function tRenderWall(){
+  const n=tList.length;let ids;
+  if(tMode==='2'){ids=[0,1,2,3].slice(0,Math.min(4,n)).map(k=>tList[(tPos+k)%n]);tFresh=-1}
+  else{if(!tWallIds.length){tWallIds=[...Array(Math.min(9,n)).keys()].map(k=>tList[(tPos+k)%n]);tSlot=0;tFresh=-1}ids=tWallIds}
+  for(const [i,e] of pool)if(!ids.includes(i)){e.h&&e.h.destroy();e.v.remove();pool.delete(i)}
+  tWall.replaceChildren(...ids.map((i,k)=>{const d=document.createElement('div');d.className='tc'+(k===tFresh?' fresh':'');d.title='Sorot kamera ini';
+    d.append(tVideo(i).v);const sp=document.createElement('span');sp.textContent=label(i);d.append(sp);
+    d.onclick=()=>{tPos=tList.indexOf(i);setTMode('1')};return d}));
+  for(const e of pool.values())e.v.play().catch(()=>{});
+  $('tPos').textContent=tMode==='2'?'Halaman '+(Math.floor(tPos/4)+1)+' / '+Math.ceil(n/4):n+' kamera · 1 berganti tiap giliran';
+  tKick();
+}
+function setTMode(m){tMode=m;$('tMode').value=m;try{localStorage.setItem('cctvTMode',m)}catch(e){}
+  tWallIds=[];if(m==='2')tPos=Math.floor(tPos/4)*4;tour.dataset.mode=m;if(tOn)tRender()}
 function tRender(){
   if(!tList.length){$('tName').textContent='Tidak ada kamera online';return}
+  tour.dataset.mode=tMode;tWall.replaceChildren();
+  if(tMode!=='1')return tRenderWall();
   const n=tList.length,want=[0,1,2,3].slice(0,Math.min(4,n)).map(k=>tList[(tPos+k)%n]);
   for(const [i,e] of pool)if(!want.includes(i)){e.h&&e.h.destroy();e.v.remove();pool.delete(i)}
   const m=tVideo(want[0]);tMain.prepend(m.v);
@@ -338,11 +373,13 @@ function tKick(){
   void p.offsetWidth;p.style.transition='width '+tSec()+'s linear';p.style.width='100%';
   tTimer=setTimeout(()=>tGo(1),tSec()*1000);
 }
-function tGo(d){if(!tList.length)return;tPos=(tPos+d+tList.length)%tList.length;tRender()}
-function tClock(){$('tClock').textContent=new Date().toLocaleString('id-ID',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function tGo(d){if(!tList.length)return;const n=tList.length;
+  if(tMode==='3'&&d===1&&n>9&&tWallIds.length){tPos=(tPos+1)%n;tWallIds[tSlot]=tList[(tPos+8)%n];tFresh=tSlot;tSlot=(tSlot+1)%9;tRenderWall();return}
+  const st=tMode==='2'?4:1;tPos=((tPos+d*st)%n+n)%n;tWallIds=[];tRender()}
+function tClock(){$('tClk2').textContent=$('tClock').textContent=new Date().toLocaleString('id-ID',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 let clk=null;
 function tourOpen(){
-  tList=urut.filter(c=>c.status==='on').map(c=>c.i);tPos=0;tOn=true;tRun=true;$('tPlay').textContent='⏸ Jeda';
+  tList=urut.filter(c=>c.status==='on').map(c=>c.i);tPos=0;tOn=true;tWallIds=[];tRun=true;$('tPlay').textContent='⏸ Jeda';
   paused=true;schedule();tour.hidden=false;document.body.style.overflow='hidden';
   tClock();clk=setInterval(tClock,1000);tRender();
   if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
@@ -355,7 +392,7 @@ function tourClose(){
   paused=false;schedule();
 }
 $('tourBtn').onclick=()=>{if(urut.some(c=>c.status==='cek')){$('tourBtn').textContent='Tunggu cek status…';setTimeout(()=>$('tourBtn').textContent='▶ Mode Tur',1500);return}tourOpen()};
-$('tX').onclick=tourClose;$('tPrev').onclick=()=>tGo(-1);$('tNext').onclick=()=>tGo(1);
+$('tX').onclick=tourClose;$('tMode').onchange=()=>setTMode($('tMode').value);$('tPrev').onclick=()=>tGo(-1);$('tNext').onclick=()=>tGo(1);
 $('tPlay').onclick=()=>{tRun=!tRun;$('tPlay').textContent=tRun?'⏸ Jeda':'▶ Lanjut';tKick()};
 $('tInt').onchange=()=>{try{localStorage.setItem('cctvInt',$('tInt').value)}catch(e){}tKick()};
 try{const v=localStorage.getItem('cctvInt');if(v)$('tInt').value=v}catch(e){}
