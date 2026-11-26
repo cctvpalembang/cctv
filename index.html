@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pantau CCTV Palembang</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,6 +36,7 @@ main{padding:16px max(4vw,16px) 40px}
 .scr{position:relative;aspect-ratio:16/9;background:#021118;cursor:zoom-in}
 .scr video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .msg{position:absolute;inset:0;display:grid;place-items:center;color:#8fb3c0;font-size:14px;text-align:center;padding:12px}
+.msg[hidden],.tth[hidden]{display:none}
 .cam.off .scr{cursor:default}
 .cam.off .msg{color:#c77}
 .meta{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;font:500 15px "Space Grotesk",sans-serif}
@@ -218,8 +220,8 @@ function attach(video,src,onErr){
 function start(c){
   if(c.hls)return;
   c.m.textContent='Memuat…';
-  c.hls=attach(c.v,url(c.i),()=>{stop(c);setStatus(c,'off','Stream terputus');counts();apply()});
   c.v.onplaying=()=>{c.m.hidden=true;c.el.classList.add('live')};
+  c.hls=attach(c.v,url(c.i),()=>{stop(c);setStatus(c,'off','Stream terputus');counts();apply()});
   counts();
 }
 function stop(c){
