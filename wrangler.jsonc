@@ -1,0 +1,9 @@
+// Konfigurasi Cloudflare Workers: menyajikan isi repo sebagai situs statis (index.html, news.json).
+{
+  "name": "cctv",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "single-page-application"
+  }
+}
