@@ -541,24 +541,26 @@ $('lite').onclick=()=>{LITE=!LITE;try{localStorage.setItem('cctvLite',LITE?'1':'
  document.querySelector('footer').append(d)}
 // ===== BERITA BERJALAN: ganti url dengan feed RSS atau JSON dari situs berita Anda =====
 // JSON yang didukung: [{title,link}] atau {items|data|articles:[{title|judul, link|url}]}. Situs sumber harus mengizinkan CORS.
-const BERITA={url:'https://sumsel.antaranews.com/rss/terkini.xml',nama:'ANTARA Sumsel',maks:15,segarkanMenit:10};
+// news.json dibuat otomatis tiap 30 menit oleh GitHub Actions (scripts/berita.py, kata kunci sama dengan aplikasi cctvpalembang/news).
+const BERITA={url:'news.json',nama:'Berita Jalan Sumsel',cadangan:{url:'https://sumsel.antaranews.com/rss/terkini.xml',nama:'ANTARA Sumsel'},maks:20,segarkanMenit:10};
 {
   const tz={timeZone:'Asia/Jakarta'};
   const tick=()=>{const d=new Date();$('tkDate').textContent=d.toLocaleDateString('id-ID',Object.assign({weekday:'long',day:'numeric',month:'long',year:'numeric'},tz))+' · '+d.toLocaleTimeString('id-ID',Object.assign({hour:'2-digit',minute:'2-digit'},tz))+' WIB'};
   tick();setInterval(tick,15000);
   $('tkSrc').textContent=BERITA.nama;
   const show=items=>{const trk=$('tkTrk');
-    const html=items.map(x=>x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.title)}</a>`:`<span>${esc(x.title)}</span>`).join('');
+    const html=items.map(x=>x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.title)}${x.source?' <small style="color:#8fb3c0;font-weight:400">· '+esc(x.source)+'</small>':''}</a>`:`<span>${esc(x.title)}</span>`).join('');
     trk.innerHTML=html+html; // digandakan supaya berjalan tanpa putus
     trk.style.setProperty('--dur',Math.max(20,items.reduce((n,x)=>n+x.title.length+6,0)*0.13)+'s')}; // ±70 piksel/detik
   const parse=t=>{t=t.trim();let out=[];
     if(t[0]==='<'){const x=new DOMParser().parseFromString(t,'text/xml');
       out=[...x.querySelectorAll('item,entry')].map(it=>{const l=it.querySelector('link');return{title:(it.querySelector('title')||{}).textContent,link:l?(l.getAttribute('href')||l.textContent):''}})}
     else{const j=JSON.parse(t),a=Array.isArray(j)?j:(j.items||j.data||j.articles||j.posts||[]);
-      out=a.map(o=>({title:o.title||o.judul||o.headline,link:o.link||o.url||''}))}
-    return out.filter(o=>o.title&&o.title.trim()).map(o=>({title:o.title.trim(),link:/^https?:/.test(o.link||'')?o.link.trim():''})).slice(0,BERITA.maks)};
-  const load=async()=>{try{const r=await fetch(BERITA.url,{cache:'no-store'});if(!r.ok)throw 0;const it=parse(await r.text());if(!it.length)throw 0;show(it)}
-    catch(e){if(!$('tkTrk').querySelector('a'))show([{title:'Berita belum bisa dimuat dari '+BERITA.nama+'. Pantau CCTV Kota Palembang & Kabupaten Banyuasin.'}])}};
+      out=a.map(o=>({title:o.title||o.judul||o.headline,link:o.link||o.url||'',source:o.source||''}))}
+    return out.filter(o=>o.title&&o.title.trim()).map(o=>({title:o.title.trim(),source:o.source||'',link:/^https?:/.test(o.link||'')?o.link.trim():''})).slice(0,BERITA.maks)};
+  const get=async u=>{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw 0;const it=parse(await r.text());if(!it.length)throw 0;return it};
+  const load=async()=>{for(const f of [BERITA,BERITA.cadangan])if(f&&f.url)try{const it=await get(f.url);$('tkSrc').textContent=f.nama;show(it);return}catch(e){}
+    if(!$('tkTrk').querySelector('a'))show([{title:'Berita belum bisa dimuat. Pantau CCTV Kota Palembang & Kabupaten Banyuasin.'}])};
   load();setInterval(load,BERITA.segarkanMenit*60000);
 }
 // ===== KATA SANDI (disimpan sebagai hash SHA-256, bukan teks asli) =====

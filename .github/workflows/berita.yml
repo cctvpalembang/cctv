@@ -1,0 +1,29 @@
+name: Perbarui pita berita
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: berita
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/berita.py news.json
+      - name: Commit jika berubah
+        run: |
+          if git diff --quiet -- news.json && git ls-files --error-unmatch news.json >/dev/null 2>&1; then echo "tidak ada perubahan"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news.json
+          git commit -m "Perbarui news.json"
+          git pull --rebase origin main
+          git push
