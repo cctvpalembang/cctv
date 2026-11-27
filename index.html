@@ -157,6 +157,8 @@ footer a{color:inherit}
 .tick .tvw{height:34px;flex:none;width:100%}
 @media(max-width:600px){.tick .tleft .tsrc{display:none}#tkDate,#tkWx{font-size:11px}}
 #tkRuas{font:600 13px Inter,sans-serif;transition:opacity .4s;white-space:nowrap}
+/* lebar slot cuaca/udara tetap, supaya posisi PPK tidak bergeser */
+@media(min-width:901px){#tkWx{flex:none;width:21em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 #tkRuas[hidden],#tkRuasSep[hidden],#tkSrc[hidden]{display:none}
 #tkRuas b{background:#fff;color:var(--hot);border-radius:4px;padding:1px 5px;margin-right:4px;font-size:11px}
 #tkRuas .mp{background:#7b1f1f;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px}
@@ -615,7 +617,7 @@ const KOTA_CUACA=[["Palembang",-2.976,104.775],["Lubuklinggau",-3.296,102.861],[
     80:['Hujan lokal ringan','🌦️'],81:['Hujan lokal','🌧️'],82:['Hujan lokal lebat','🌧️'],95:['Badai petir','⛈️'],96:['Badai petir','⛈️'],99:['Badai petir','⛈️']};
   // Kota yang juga ditampilkan kualitas udaranya (US AQI, Open-Meteo)
   const KOTA_UDARA=['Palembang','Lubuklinggau','Muara Enim','Pagar Alam'];
-  const AQI=[[50,'Baik','#18a36b'],[100,'Sedang','#f2c200'],[150,'Tidak sehat (sensitif)','#ff8a00'],[200,'Tidak sehat','#e53935'],[300,'Sangat tidak sehat','#8e24aa'],[1e9,'Berbahaya','#7b1f1f']];
+  const AQI=[[50,'Baik','#18a36b'],[100,'Sedang','#f2c200'],[150,'Kurang sehat','#ff8a00'],[200,'Tidak sehat','#e53935'],[300,'Sangat tidak sehat','#8e24aa'],[1e9,'Berbahaya','#7b1f1f']];
   let data=[],udara={},k=0;const el=$('tkWx');
   // Urutan bergantian: cuaca kota, lalu udara kota itu (bila ada), lalu kota berikutnya
   const urutan=()=>{const o=[];for(const d of data){o.push(d);if(udara[d.nama])o.push(udara[d.nama])}return o};
