@@ -153,20 +153,22 @@ footer{padding:0 max(4vw,16px) 32px;color:var(--mute);font-size:13px}
 footer a{color:inherit}
 /* pita: baris 1 tanggal · cuaca, baris 2 berita selebar penuh */
 .tick{flex-direction:column;height:auto!important}
-.tick .tleft{flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;height:28px;padding:0 12px}
+.tick .tleft{flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;height:28px;padding:0 12px;min-width:0;overflow:hidden}
+.tick .tleft>#tkDate,.tick .tleft>.tsep{flex:none}
 .tick .tleft .sp{flex:1}
 .tick .tleft .tsep{opacity:.7}
 .tick .tleft .tsrc{background:none;color:#fff;opacity:.85;padding:0;font-size:11px}
 #tkDate{font-size:14px}#tkWx{font-size:13px}
 .tick .tvw{height:34px;flex:none;width:100%}
 @media(max-width:600px){.tick .tleft .tsrc{display:none}#tkDate,#tkWx{font-size:11px}}
-#tkRuas{font:600 13px Inter,sans-serif;transition:opacity .4s;white-space:nowrap}
+#tkRuas{font:600 13px Inter,sans-serif;transition:opacity .4s;white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
 /* lebar slot cuaca/udara tetap, supaya posisi PPK tidak bergeser */
-@media(min-width:901px){#tkWx{flex:none;width:21em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+@media(min-width:601px){#tkWx{flex:none;width:21em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+@media(max-width:1300px){#tkWx{width:15.5em!important}#tkWx small{display:none}}
 #tkRuas[hidden],#tkRuasSep[hidden],#tkSrc[hidden]{display:none}
 #tkRuas b{background:#fff;color:var(--hot);border-radius:4px;padding:1px 5px;margin-right:4px;font-size:11px}
-#tkRuas .mp{background:#7b1f1f;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px}
-@media(max-width:900px){#tkRuas,#tkRuasSep{display:none!important}}
+#tkRuas .mp{background:#7b1f1f;color:#fff;border-radius:4px;padding:1px 5px;margin-left:2px}
+@media(max-width:600px){#tkRuas,#tkRuasSep{display:none!important}}
 </style>
 </head>
 <body class="locked">
@@ -657,8 +659,9 @@ const KOTA_CUACA=[["Palembang",-2.976,104.775],["Lubuklinggau",-3.296,102.861],[
   let list=[],k=0;const el=$('tkRuas');
   const jam=m=>m>=60?Math.floor(m/60)+' j '+(m%60)+' mnt':m+' mnt';
   const show=()=>{if(!list.length)return;const x=list[k++%list.length];el.style.opacity=0;
-    setTimeout(()=>{el.innerHTML=`<b>PPK ${esc(x.ppk)}</b>${esc(x.arah)}: ${jam(x.waktu_menit)} · ±${x.kecepatan} km/jam · ${String(x.jarak_km).replace('.',',')} km`+
-      (x.macet_parah_km>=0.1?`<span class="mp">Macet parah ${String(x.macet_parah_km).replace('.',',')} km</span>`:` · ${esc(x.kategori)}`);el.style.opacity=1},300)};
+    setTimeout(()=>{el.innerHTML=`<b>PPK ${esc(x.ppk)}</b>${esc(x.arah)} `+
+      (x.macet_parah_km>=0.1?`<span class="mp">Macet parah ${String(x.macet_parah_km).replace('.',',')} km</span>`:`· ${esc(x.kategori)}`)+
+      ` · ${jam(x.waktu_menit)} · ±${x.kecepatan} km/jam · ${String(x.jarak_km).replace('.',',')} km`;el.title=el.textContent;el.style.opacity=1},300)};
   const load=async()=>{for(const u of ['https://raw.githubusercontent.com/cctvpalembang/cctv/main/ruas.json','ruas.json'])try{
       const j=await (await fetch(u,{cache:'no-store'})).json();const nl=[];j.ruas.forEach(r=>r.arah.forEach(a=>nl.push(Object.assign({ppk:r.ppk},a))));
       if(!nl.length)continue;const first=!list.length;list=nl;el.hidden=false;$('tkRuasSep').hidden=false;if(first)show();return}catch(e){}};
