@@ -22,6 +22,15 @@ def kategori(rasio):
     return "Macet parah"
 
 
+URUT = ["Lancar", "Ramai lancar", "Padat", "Macet", "Macet parah"]
+
+
+def naikkan(kat, km):
+    # antrean panjang menaikkan kategori walau total tundaan kecil
+    minimal = "Macet" if km["parah"] >= 2 else "Padat" if km["parah"] + km["macet"] >= 1 else "Lancar"
+    return URUT[max(URUT.index(kat), URUT.index(minimal))]
+
+
 def olah(route):
     s = route["summary"]
     pts = [(p["latitude"], p["longitude"]) for leg in route["legs"] for p in leg["points"]]
@@ -42,11 +51,11 @@ def olah(route):
         elif m == 1:
             km["padat"] += panjang
     L, T = s["lengthInMeters"] / 1000, s["travelTimeInSeconds"]
-    T0 = s.get("noTrafficTravelTimeInSeconds") or T
+    T0 = max(1, T - s.get("trafficDelayInSeconds", 0))  # waktu tanpa hambatan = waktu sekarang dikurangi tundaan lalu lintas
     return {"jarak_km": round(L, 1), "waktu_menit": round(T / 60), "kecepatan": round(L / (T / 3600)) if T else 0,
             "tunda_menit": round(s.get("trafficDelayInSeconds", 0) / 60),
             "macet_parah_km": round(km["parah"], 1), "macet_km": round(km["macet"], 1), "padat_km": round(km["padat"], 1),
-            "kategori": kategori(T / T0 if T0 else 1)}
+            "kategori": naikkan(kategori(T / T0), km)}
 
 
 def rute(key, titik):
