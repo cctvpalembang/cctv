@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T03:22:06Z",
+ "updated": "2026-11-27T03:27:43Z",
  "sumber": "TomTom Traffic",
  "ruas": [
   {
@@ -8,23 +8,23 @@
    "arah": [
     {
      "arah": "Palembang → Betung",
-     "jarak_km": 59.7,
-     "waktu_menit": 118,
+     "jarak_km": 58.0,
+     "waktu_menit": 117,
      "kecepatan": 30,
-     "tunda_menit": 0,
+     "tunda_menit": 3,
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
-     "padat_km": 0.0,
+     "padat_km": 1.0,
      "kategori": "Lancar"
     },
     {
      "arah": "Betung → Palembang",
-     "jarak_km": 58.2,
-     "waktu_menit": 118,
+     "jarak_km": 58.6,
+     "waktu_menit": 119,
      "kecepatan": 30,
-     "tunda_menit": 1,
-     "macet_parah_km": 0.1,
-     "macet_km": 0.0,
+     "tunda_menit": 2,
+     "macet_parah_km": 0.0,
+     "macet_km": 0.2,
      "padat_km": 0.0,
      "kategori": "Lancar"
     }
@@ -37,7 +37,7 @@
     {
      "arah": "Betung → Sei Lilin → Peninggalan",
      "jarak_km": 77.4,
-     "waktu_menit": 117,
+     "waktu_menit": 116,
      "kecepatan": 40,
      "tunda_menit": 0,
      "macet_parah_km": 0.0,
@@ -48,12 +48,12 @@
     {
      "arah": "Peninggalan → Sei Lilin → Betung",
      "jarak_km": 77.4,
-     "waktu_menit": 111,
-     "kecepatan": 42,
-     "tunda_menit": 0,
+     "waktu_menit": 113,
+     "kecepatan": 41,
+     "tunda_menit": 2,
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
-     "padat_km": 0.0,
+     "padat_km": 1.4,
      "kategori": "Lancar"
     }
    ]
@@ -85,6 +85,48 @@
      "kategori": "Lancar"
     }
    ]
+  }
+ ],
+ "titik": [
+  {
+   "ppk": "1.5",
+   "nama": "Sukomoro – Talang Betutu (KM 15–20)",
+   "kecepatan": 32,
+   "normal": 34,
+   "kategori": "Lancar",
+   "keyakinan": 0.51
+  },
+  {
+   "ppk": "1.5",
+   "nama": "Sisi barat Sukomoro (KM 18–20)",
+   "kecepatan": 32,
+   "normal": 34,
+   "kategori": "Lancar",
+   "keyakinan": 0.51
+  },
+  {
+   "ppk": "1.2",
+   "nama": "Kota Betung (KM 69–71)",
+   "kecepatan": 42,
+   "normal": 42,
+   "kategori": "Lancar",
+   "keyakinan": 1
+  },
+  {
+   "ppk": "1.2",
+   "nama": "Pasar Sungai Lilin (KM 112,6)",
+   "kecepatan": 47,
+   "normal": 47,
+   "kategori": "Lancar",
+   "keyakinan": 1
+  },
+  {
+   "ppk": "1.1",
+   "nama": "Kota Bayung Lencir",
+   "kecepatan": 33,
+   "normal": 42,
+   "kategori": "Ramai lancar",
+   "keyakinan": 0.77
   }
  ]
 }
