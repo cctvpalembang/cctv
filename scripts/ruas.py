@@ -151,9 +151,23 @@ def google(key, titik):
             "kategori": kategori_warna(p_slow, p_jam)}
 
 
+BATAS_GOOGLE = int(os.environ.get("BATAS_GOOGLE", "4500"))
+
+
 def main(out_path):
     gkey = os.environ.get("GOOGLE_ROUTES_KEY", "").strip()
     key = os.environ.get("TOMTOM_KEY", "").strip()
+    # Penghitung pemakaian Google per bulan (gratis 5.000 request/bulan; batas aman 4.500)
+    bulan = time.strftime("%Y-%m", time.gmtime())
+    try:
+        kuota = json.load(open(out_path, encoding="utf-8")).get("kuota_google") or {}
+    except Exception:
+        kuota = {}
+    if kuota.get("bulan") != bulan:
+        kuota = {"bulan": bulan, "pakai": 0}
+    if gkey and kuota["pakai"] + 6 > BATAS_GOOGLE:
+        print("kuota Google bulan ini sudah %d request; pakai TomTom sampai bulan depan" % kuota["pakai"])
+        gkey = ""
     if gkey:
         try:  # Google maks. 1x per jam (kuota gratis)
             lama = json.load(open(out_path, encoding="utf-8"))
@@ -172,6 +186,8 @@ def main(out_path):
         arah = []
         for nama, titik in [(s["naik"], s["titik"]), (s["turun"], s["titik"][::-1])]:
             try:
+                if gkey:
+                    kuota["pakai"] += 1
                 data = google(gkey, titik) if gkey else olah(rute(key, titik))
                 arah.append(dict(arah=nama, **data))
             except Exception as e:
@@ -189,9 +205,9 @@ def main(out_path):
         except Exception as e:
             print("gagal titik", nama, e, file=sys.stderr)
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump({"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "sumber": "Google" if gkey else "TomTom Traffic", "ruas": hasil, "titik": titik},
+        json.dump({"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "sumber": "Google" if gkey else "TomTom Traffic", "ruas": hasil, "titik": titik, "kuota_google": kuota},
                   f, ensure_ascii=False, indent=1)
-    print(len(hasil), "ruas ditulis,", gagal, "gagal")
+    print(len(hasil), "ruas ditulis,", gagal, "gagal; pemakaian Google bulan ini:", kuota["pakai"], "/", BATAS_GOOGLE)
 
 
 if __name__ == "__main__":
