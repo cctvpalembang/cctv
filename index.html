@@ -155,7 +155,7 @@ footer a{color:inherit}
 .tick .tvw{height:34px;flex:none;width:100%}
 @media(max-width:600px){.tick .tleft .tsrc{display:none}#tkDate,#tkWx{font-size:11px}}
 #tkRuas{font:600 13px Inter,sans-serif;transition:opacity .4s;white-space:nowrap}
-#tkRuas[hidden],#tkRuasSep[hidden]{display:none}
+#tkRuas[hidden],#tkRuasSep[hidden],#tkSrc[hidden]{display:none}
 #tkRuas b{background:#fff;color:var(--hot);border-radius:4px;padding:1px 5px;margin-right:4px;font-size:11px}
 #tkRuas .mp{background:#7b1f1f;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px}
 @media(max-width:900px){#tkRuas,#tkRuasSep{display:none!important}}
@@ -200,7 +200,7 @@ footer a{color:inherit}
   <button id="logout">Keluar akun</button>
   <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
   </div></details>
-  <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tleft"><div id="tkDate">–</div><span class="tsep">·</span><div id="tkWx" aria-live="off">Memuat cuaca…</div><span class="tsep">·</span><div id="tkAqi" title="Kualitas udara Palembang (US AQI, Open-Meteo)">AQI…</div><span class="tsep" id="tkRuasSep" hidden>·</span><div id="tkRuas" hidden title="Kondisi ruas jalan nasional (TomTom Traffic)"></div><span class="sp"></span><div class="tsrc" id="tkSrc"></div></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
+  <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tleft"><div id="tkDate">–</div><span class="tsep">·</span><div id="tkWx" aria-live="off">Memuat cuaca…</div><span class="tsep">·</span><div id="tkAqi" title="Kualitas udara Palembang (US AQI, Open-Meteo)">AQI…</div><span class="tsep" id="tkRuasSep" hidden>·</span><div id="tkRuas" hidden title="Kondisi ruas jalan nasional (Google)"></div><span class="sp"></span><div class="tsrc" id="tkSrc" hidden></div></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
 </div>
 <main>
 <section class="rg" id="rPlg"><h2 class="reg">Kota Palembang</h2><div class="grid" id="grid"></div></section>
