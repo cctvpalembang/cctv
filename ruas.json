@@ -1,6 +1,6 @@
 {
- "updated": "2026-11-27T03:27:43Z",
- "sumber": "TomTom Traffic",
+ "updated": "2026-11-27T03:40:03Z",
+ "sumber": "Google",
  "ruas": [
   {
    "ppk": "1.5",
@@ -8,25 +8,35 @@
    "arah": [
     {
      "arah": "Palembang → Betung",
-     "jarak_km": 58.0,
-     "waktu_menit": 117,
-     "kecepatan": 30,
-     "tunda_menit": 3,
-     "macet_parah_km": 0.0,
+     "jarak_km": 55.6,
+     "waktu_menit": 155,
+     "kecepatan": 21,
+     "tunda_menit": 47,
+     "macet_parah_km": 4.8,
      "macet_km": 0.0,
-     "padat_km": 1.0,
-     "kategori": "Lancar"
+     "padat_km": 2.3,
+     "persen": {
+      "hijau": 87,
+      "oranye": 4,
+      "merah": 9
+     },
+     "kategori": "Padat"
     },
     {
      "arah": "Betung → Palembang",
-     "jarak_km": 58.6,
-     "waktu_menit": 119,
-     "kecepatan": 30,
-     "tunda_menit": 2,
-     "macet_parah_km": 0.0,
-     "macet_km": 0.2,
-     "padat_km": 0.0,
-     "kategori": "Lancar"
+     "jarak_km": 55.6,
+     "waktu_menit": 165,
+     "kecepatan": 20,
+     "tunda_menit": 58,
+     "macet_parah_km": 4.3,
+     "macet_km": 0.0,
+     "padat_km": 5.7,
+     "persen": {
+      "hijau": 82,
+      "oranye": 10,
+      "merah": 8
+     },
+     "kategori": "Padat"
     }
    ]
   },
@@ -36,25 +46,35 @@
    "arah": [
     {
      "arah": "Betung → Sei Lilin → Peninggalan",
-     "jarak_km": 77.4,
-     "waktu_menit": 116,
-     "kecepatan": 40,
-     "tunda_menit": 0,
+     "jarak_km": 77.6,
+     "waktu_menit": 131,
+     "kecepatan": 36,
+     "tunda_menit": 5,
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
-     "padat_km": 0.0,
+     "padat_km": 1.1,
+     "persen": {
+      "hijau": 99,
+      "oranye": 1,
+      "merah": 0
+     },
      "kategori": "Lancar"
     },
     {
      "arah": "Peninggalan → Sei Lilin → Betung",
-     "jarak_km": 77.4,
-     "waktu_menit": 113,
-     "kecepatan": 41,
-     "tunda_menit": 2,
-     "macet_parah_km": 0.0,
+     "jarak_km": 77.6,
+     "waktu_menit": 138,
+     "kecepatan": 34,
+     "tunda_menit": 19,
+     "macet_parah_km": 3.1,
      "macet_km": 0.0,
-     "padat_km": 1.4,
-     "kategori": "Lancar"
+     "padat_km": 1.1,
+     "persen": {
+      "hijau": 95,
+      "oranye": 1,
+      "merah": 4
+     },
+     "kategori": "Ramai lancar"
     }
    ]
   },
@@ -64,69 +84,38 @@
    "arah": [
     {
      "arah": "arah Jambi",
-     "jarak_km": 88.9,
-     "waktu_menit": 128,
-     "kecepatan": 42,
-     "tunda_menit": 0,
-     "macet_parah_km": 0.0,
+     "jarak_km": 89.0,
+     "waktu_menit": 150,
+     "kecepatan": 36,
+     "tunda_menit": 8,
+     "macet_parah_km": 0.4,
      "macet_km": 0.0,
-     "padat_km": 0.0,
+     "padat_km": 1.7,
+     "persen": {
+      "hijau": 98,
+      "oranye": 2,
+      "merah": 0
+     },
      "kategori": "Lancar"
     },
     {
      "arah": "arah Peninggalan",
-     "jarak_km": 88.9,
-     "waktu_menit": 119,
-     "kecepatan": 45,
-     "tunda_menit": 0,
-     "macet_parah_km": 0.0,
+     "jarak_km": 89.0,
+     "waktu_menit": 138,
+     "kecepatan": 39,
+     "tunda_menit": 5,
+     "macet_parah_km": 0.3,
      "macet_km": 0.0,
-     "padat_km": 0.0,
+     "padat_km": 2.6,
+     "persen": {
+      "hijau": 97,
+      "oranye": 3,
+      "merah": 0
+     },
      "kategori": "Lancar"
     }
    ]
   }
  ],
- "titik": [
-  {
-   "ppk": "1.5",
-   "nama": "Sukomoro – Talang Betutu (KM 15–20)",
-   "kecepatan": 32,
-   "normal": 34,
-   "kategori": "Lancar",
-   "keyakinan": 0.51
-  },
-  {
-   "ppk": "1.5",
-   "nama": "Sisi barat Sukomoro (KM 18–20)",
-   "kecepatan": 32,
-   "normal": 34,
-   "kategori": "Lancar",
-   "keyakinan": 0.51
-  },
-  {
-   "ppk": "1.2",
-   "nama": "Kota Betung (KM 69–71)",
-   "kecepatan": 42,
-   "normal": 42,
-   "kategori": "Lancar",
-   "keyakinan": 1
-  },
-  {
-   "ppk": "1.2",
-   "nama": "Pasar Sungai Lilin (KM 112,6)",
-   "kecepatan": 47,
-   "normal": 47,
-   "kategori": "Lancar",
-   "keyakinan": 1
-  },
-  {
-   "ppk": "1.1",
-   "nama": "Kota Bayung Lencir",
-   "kecepatan": 33,
-   "normal": 42,
-   "kategori": "Ramai lancar",
-   "keyakinan": 0.77
-  }
- ]
+ "titik": []
 }
