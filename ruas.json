@@ -83,7 +83,7 @@
    "nama": "Bts. Prov. Jambi – Peninggalan",
    "arah": [
     {
-     "arah": "arah Jambi",
+     "arah": "Peninggalan → Batas Prov. Jambi",
      "jarak_km": 89.0,
      "waktu_menit": 141,
      "kecepatan": 38,
@@ -99,7 +99,7 @@
      "kategori": "Lancar"
     },
     {
-     "arah": "arah Peninggalan",
+     "arah": "Batas Prov. Jambi → Peninggalan",
      "jarak_km": 89.0,
      "waktu_menit": 140,
      "kecepatan": 38,
