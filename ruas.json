@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T03:19:48Z",
+ "updated": "2026-11-27T03:22:06Z",
  "sumber": "TomTom Traffic",
  "ruas": [
   {
@@ -8,14 +8,14 @@
    "arah": [
     {
      "arah": "Palembang → Betung",
-     "jarak_km": 59.3,
-     "waktu_menit": 117,
+     "jarak_km": 59.7,
+     "waktu_menit": 118,
      "kecepatan": 30,
-     "tunda_menit": 4,
+     "tunda_menit": 0,
      "macet_parah_km": 0.0,
-     "macet_km": 0.8,
-     "padat_km": 0.9,
-     "kategori": "Padat"
+     "macet_km": 0.0,
+     "padat_km": 0.0,
+     "kategori": "Lancar"
     },
     {
      "arah": "Betung → Palembang",
@@ -26,7 +26,7 @@
      "macet_parah_km": 0.1,
      "macet_km": 0.0,
      "padat_km": 0.0,
-     "kategori": "Ramai lancar"
+     "kategori": "Lancar"
     }
    ]
   },
@@ -37,13 +37,13 @@
     {
      "arah": "Betung → Sei Lilin → Peninggalan",
      "jarak_km": 77.4,
-     "waktu_menit": 118,
-     "kecepatan": 39,
+     "waktu_menit": 117,
+     "kecepatan": 40,
      "tunda_menit": 0,
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
      "padat_km": 0.0,
-     "kategori": "Ramai lancar"
+     "kategori": "Lancar"
     },
     {
      "arah": "Peninggalan → Sei Lilin → Betung",
@@ -54,7 +54,7 @@
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
      "padat_km": 0.0,
-     "kategori": "Ramai lancar"
+     "kategori": "Lancar"
     }
    ]
   },
@@ -71,7 +71,7 @@
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
      "padat_km": 0.0,
-     "kategori": "Ramai lancar"
+     "kategori": "Lancar"
     },
     {
      "arah": "arah Peninggalan",
