@@ -23,7 +23,7 @@ jobs:
         run: python3 scripts/ruas.py ruas.json
         continue-on-error: true
         env:
-          TOMTOM_KEY: ${{ secrets.TOMTOM_KEY }}
+          TOMTOM_KEY: ${{ secrets.TOMTOM_KEY || secrets.APIKEY }}
       - name: Commit jika berubah
         run: |
           git add news.json
