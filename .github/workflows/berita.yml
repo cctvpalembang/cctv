@@ -20,10 +20,11 @@ jobs:
       - run: python3 scripts/berita.py news.json
         continue-on-error: true
       - name: Kondisi ruas (TomTom)
-        run: python3 scripts/ruas.py ruas.json
+        run: python3 scripts/ruas.py ruas.json || (echo "Google gagal, coba TomTom"; GOOGLE_ROUTES_KEY= python3 scripts/ruas.py ruas.json)
         continue-on-error: true
         env:
           TOMTOM_KEY: ${{ secrets.TOMTOM_KEY || secrets.APIKEY }}
+          GOOGLE_ROUTES_KEY: ${{ secrets.GOOGLE_ROUTES_KEY }}
       - name: Commit jika berubah
         run: |
           git add news.json
