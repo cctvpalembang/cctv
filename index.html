@@ -36,6 +36,7 @@ main{padding:6px max(2vw,12px) 40px}
 .cam{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
 .cam[hidden]{display:none}
 .scr{position:relative;aspect-ratio:16/9;background:#021118;cursor:zoom-in}
+.scr{max-height:var(--scrMax,none)}
 .scr video{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover}
 .msg{position:absolute;top:0;right:0;bottom:0;left:0;display:grid;place-items:center;color:#8fb3c0;font-size:14px;text-align:center;padding:12px}
 .msg[hidden],.tth[hidden]{display:none}
@@ -669,6 +670,18 @@ $('gForm').addEventListener('submit',async e=>{e.preventDefault();
   else{$('gErr').textContent='Kata sandi salah.';$('gPw').select()}
 });
 $('logout').onclick=()=>{try{localStorage.removeItem('cctvAuth');sessionStorage.removeItem('cctvAuth')}catch(e){}location.reload()};
+}
+
+// ===== LAYAR TV/LAPTOP: 2 baris kamera + judulnya muat penuh tanpa scroll =====
+{
+  const pas=()=>{const r=document.documentElement;
+    const cam=[...document.querySelectorAll('.grid .cam')].find(e=>e.offsetParent),meta=cam&&cam.querySelector('.meta');
+    if(!cam||!meta||innerWidth<900||innerWidth<innerHeight){r.style.removeProperty('--scrMax');return}
+    const top=cam.getBoundingClientRect().top+scrollY,gap=parseFloat(getComputedStyle(cam.parentNode).rowGap)||14;
+    const h=Math.floor((innerHeight-top-2*meta.offsetHeight-gap-10)/2);
+    if(h>=120)r.style.setProperty('--scrMax',h+'px');else r.style.removeProperty('--scrMax')};
+  addEventListener('resize',pas);addEventListener('load',pas);document.addEventListener('click',()=>setTimeout(pas,50));
+  setTimeout(pas,300);setTimeout(pas,1500);setTimeout(pas,4000);
 }
 </script>
 </body>
