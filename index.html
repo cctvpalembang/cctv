@@ -120,6 +120,7 @@ body.touring #tour{padding-top:68px}
 .tick .tleft{flex:none;min-width:max-content;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:0 12px;background:var(--hot);color:#fff;white-space:nowrap;line-height:1.1}
 #tkDate{font:700 13px "Space Grotesk",sans-serif}
 #tkWx{font:600 12px Inter,sans-serif;transition:opacity .4s}
+#tkWx i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid #fff;vertical-align:-1px;margin-right:2px}
 #tkWx small{font:inherit;opacity:.85}
 @media(max-width:600px){#tkDate{font-size:11px}#tkWx{font-size:11px}.tick .tleft{padding:0 8px}}
 .hreg{color:var(--hot);font-weight:500}
@@ -159,9 +160,6 @@ footer a{color:inherit}
 #tkRuas b{background:#fff;color:var(--hot);border-radius:4px;padding:1px 5px;margin-right:4px;font-size:11px}
 #tkRuas .mp{background:#7b1f1f;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px}
 @media(max-width:900px){#tkRuas,#tkRuasSep{display:none!important}}
-#tkAqi{font:600 13px Inter,sans-serif;display:flex;align-items:center;gap:5px}
-#tkAqi i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid #fff}
-@media(max-width:600px){#tkAqi{font-size:11px}}
 </style>
 </head>
 <body class="locked">
@@ -200,7 +198,7 @@ footer a{color:inherit}
   <button id="logout">Keluar akun</button>
   <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
   </div></details>
-  <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tleft"><div id="tkDate">–</div><span class="tsep">·</span><div id="tkWx" aria-live="off">Memuat cuaca…</div><span class="tsep">·</span><div id="tkAqi" title="Kualitas udara Palembang (US AQI, Open-Meteo)">AQI…</div><span class="tsep" id="tkRuasSep" hidden>·</span><div id="tkRuas" hidden title="Kondisi ruas jalan nasional (Google)"></div><span class="sp"></span><div class="tsrc" id="tkSrc" hidden></div></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
+  <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tleft"><div id="tkDate">–</div><span class="tsep">·</span><div id="tkWx" aria-live="off">Memuat cuaca…</div><span class="tsep" id="tkRuasSep" hidden>·</span><div id="tkRuas" hidden title="Kondisi ruas jalan nasional (Google)"></div><span class="sp"></span><div class="tsrc" id="tkSrc" hidden></div></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
 </div>
 <main>
 <section class="rg" id="rPlg"><h2 class="reg">Kota Palembang</h2><div class="grid" id="grid"></div></section>
@@ -610,27 +608,31 @@ const KOTA_CUACA=[["Palembang",-2.976,104.775],["Lubuklinggau",-3.296,102.861],[
     51:['Gerimis ringan','🌦️'],53:['Gerimis','🌦️'],55:['Gerimis lebat','🌧️'],56:['Gerimis','🌦️'],57:['Gerimis','🌦️'],
     61:['Hujan ringan','🌦️'],63:['Hujan sedang','🌧️'],65:['Hujan lebat','🌧️'],66:['Hujan','🌧️'],67:['Hujan lebat','🌧️'],
     80:['Hujan lokal ringan','🌦️'],81:['Hujan lokal','🌧️'],82:['Hujan lokal lebat','🌧️'],95:['Badai petir','⛈️'],96:['Badai petir','⛈️'],99:['Badai petir','⛈️']};
-  let data=[],k=0;const el=$('tkWx');
-  const show=()=>{if(!data.length)return;const d=data[k++%data.length];const [txt,ic]=KODE[d.code]||['–','🌡️'];
-    const icon=(d.code<=1&&!d.day)?'🌙':ic;el.style.opacity=0;
-    setTimeout(()=>{el.innerHTML=`${icon} ${esc(d.nama)} ${Math.round(d.t)}°C <small>${txt}</small>`;el.style.opacity=1},300)};
+  // Kota yang juga ditampilkan kualitas udaranya (US AQI, Open-Meteo)
+  const KOTA_UDARA=['Palembang','Lubuklinggau','Muara Enim','Pagar Alam'];
+  const AQI=[[50,'Baik','#18a36b'],[100,'Sedang','#f2c200'],[150,'Tidak sehat (sensitif)','#ff8a00'],[200,'Tidak sehat','#e53935'],[300,'Sangat tidak sehat','#8e24aa'],[1e9,'Berbahaya','#7b1f1f']];
+  let data=[],udara={},k=0;const el=$('tkWx');
+  // Urutan bergantian: cuaca kota, lalu udara kota itu (bila ada), lalu kota berikutnya
+  const urutan=()=>{const o=[];for(const d of data){o.push(d);if(udara[d.nama])o.push(udara[d.nama])}return o};
+  const show=()=>{const o=urutan();if(!o.length)return;const d=o[k++%o.length];el.style.opacity=0;
+    setTimeout(()=>{if(d.aqi!=null){const [,txt,col]=AQI.find(a=>d.aqi<=a[0]);
+        el.innerHTML=`<i style="background:${col}"></i>Udara ${esc(d.nama)}: AQI ${d.aqi} <small>${txt}</small>`;
+        el.title='Kualitas udara '+d.nama+' · US AQI '+d.aqi+' · PM2.5 '+(d.pm!=null?d.pm.toFixed(1):'–')+' µg/m³ (Open-Meteo, perkiraan model)'}
+      else{const [txt,ic]=KODE[d.code]||['–','🌡️'];const icon=(d.code<=1&&!d.day)?'🌙':ic;
+        el.innerHTML=`${icon} ${esc(d.nama)} ${Math.round(d.t)}°C <small>${txt}</small>`;el.title='Cuaca '+d.nama+' (Open-Meteo)'}
+      el.style.opacity=1},300)};
   const load=async()=>{try{
     const u='https://api.open-meteo.com/v1/forecast?latitude='+KOTA_CUACA.map(c=>c[1]).join(',')+'&longitude='+KOTA_CUACA.map(c=>c[2]).join(',')+'&current=temperature_2m,weather_code,is_day&timezone=Asia%2FJakarta';
     let j=await (await fetch(u)).json();if(!Array.isArray(j))j=[j];
     const nd=j.map((r,i)=>r&&r.current?{nama:KOTA_CUACA[i][0],t:r.current.temperature_2m,code:r.current.weather_code,day:r.current.is_day}:null).filter(Boolean);
     if(nd.length){const first=!data.length;data=nd;if(first)show()}}catch(e){if(!data.length)el.textContent='Cuaca belum tersedia'}};
-  load();setInterval(load,20*60000);setInterval(show,5000);
-}
-// ===== KUALITAS UDARA PALEMBANG (US AQI dari Open-Meteo, gratis tanpa kunci) =====
-{
-  const AQI=[[50,'Baik','#18a36b'],[100,'Sedang','#f2c200'],[150,'Tidak sehat (sensitif)','#ff8a00'],[200,'Tidak sehat','#e53935'],[300,'Sangat tidak sehat','#8e24aa'],[1e9,'Berbahaya','#7b1f1f']];
-  const load=async()=>{try{
-    const j=await (await fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-2.976&longitude=104.775&current=us_aqi,pm2_5&timezone=Asia%2FJakarta')).json();
-    const v=Math.round(j.current.us_aqi),pm=j.current.pm2_5,[,txt,col]=AQI.find(a=>v<=a[0]);
-    $('tkAqi').innerHTML=`<i style="background:${col}"></i>Udara Palembang: AQI ${v} ${txt}`;
-    $('tkAqi').title='Kualitas udara Palembang · US AQI '+v+' · PM2.5 '+(pm!=null?pm.toFixed(1):'–')+' µg/m³ (Open-Meteo, perkiraan model)'}
-    catch(e){$('tkAqi').textContent='AQI belum tersedia'}};
-  load();setInterval(load,30*60000);
+  const loadUdara=async()=>{try{
+    const kk=KOTA_CUACA.filter(c=>KOTA_UDARA.includes(c[0]));
+    const u='https://air-quality-api.open-meteo.com/v1/air-quality?latitude='+kk.map(c=>c[1]).join(',')+'&longitude='+kk.map(c=>c[2]).join(',')+'&current=us_aqi,pm2_5&timezone=Asia%2FJakarta';
+    let j=await (await fetch(u)).json();if(!Array.isArray(j))j=[j];const nu={};
+    j.forEach((r,i)=>{if(r&&r.current&&r.current.us_aqi!=null)nu[kk[i][0]]={nama:kk[i][0],aqi:Math.round(r.current.us_aqi),pm:r.current.pm2_5}});
+    udara=nu}catch(e){}};
+  load();loadUdara();setInterval(load,20*60000);setInterval(loadUdara,30*60000);setInterval(show,5000);
 }
 // ===== KONDISI RUAS JALAN NASIONAL per PPK (ruas.json dari TomTom, diperbarui GitHub Actions tiap 30 menit) =====
 {
