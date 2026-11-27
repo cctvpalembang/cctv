@@ -5,10 +5,20 @@ const REPO = "cctvpalembang/cctv", WORKFLOW = "berita.yml";
 
 export default {
   async fetch(request, env) {
+    // Uji manual: buka /uji-jadwal (situs tetap dilindungi Cloudflare Access)
+    if (new URL(request.url).pathname === "/uji-jadwal") {
+      const hasil = await picu(env);
+      return new Response(hasil, { headers: { "content-type": "text/plain; charset=utf-8" } });
+    }
     return env.ASSETS.fetch(request);
   },
   async scheduled(event, env, ctx) {
-    if (!env.GH_TOKEN) { console.log("GH_TOKEN belum diisi; jadwal dilewati"); return; }
+    console.log(await picu(env));
+  },
+};
+
+async function picu(env) {
+    if (!env.GH_TOKEN) return "GAGAL: GH_TOKEN belum terbaca oleh worker (simpan di Settings > Variables and secrets, bukan di Builds)";
     const r = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW}/dispatches`, {
       method: "POST",
       headers: {
@@ -19,6 +29,6 @@ export default {
       },
       body: JSON.stringify({ ref: "main" }),
     });
-    console.log("dispatch", r.status, r.status === 204 ? "ok" : await r.text());
-  },
-};
+    if (r.status === 204) return "BERHASIL: pembaruan berita dipicu (" + new Date().toISOString() + ")";
+    return "GAGAL: GitHub menjawab " + r.status + " — " + (await r.text()).slice(0, 300);
+}
