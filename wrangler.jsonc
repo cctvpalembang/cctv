@@ -10,6 +10,6 @@
     "not_found_handling": "single-page-application"
   },
   "triggers": {
-    "crons": ["2,32 * * * *"]
+    "crons": ["*/15 * * * *"]
   }
 }
