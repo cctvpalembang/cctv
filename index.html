@@ -258,9 +258,15 @@ footer a{color:inherit}
 const LOKASI={
   1:"", 2:"BKB", 3:"Simpang Polda", 4:"Simpang Macan Lindung", 5:"Simpang Angkatan 45 / Dunkin Donat", 6:"Simpang Cinde", 7:"", 8:"Simpang Charitas", 9:"Bundaran Air Mancur", 10:"",
   11:"", 12:"", 13:"KM 12", 14:"", 15:"", 16:"", 17:"", 18:"", 19:"", 20:"Plaza 7 Ulu",
-  21:"Samsat", 22:"", 23:"", 24:"Darma Agung (KM 17)", 25:"Parkir BKB", 26:"", 27:"", 28:"", 29:"", 30:"Arah Ampera",
+  21:"Samsat", 22:"", 23:"", 24:"Darma Agung - Burlian (KM 7)", 25:"Parkir BKB", 26:"", 27:"", 28:"", 29:"", 30:"Arah Ampera",
   31:"", 32:"", 33:"", 34:"", 35:"", 36:"Pasar 16", 37:"Depan Satpol PP", 38:"Lampu Merah Kol. Atmo", 39:"Bank Sumsel Atmo", 40:"Taman Siswa 1",
-  41:"Taman Siswa 2", 42:"Simpang Boom Baru", 43:"", 44:"Simpang Kampus", 45:"Simpang Bandara", 46:"", 47:"Taman Siswa 3", 48:"Simpang Soekarno Hatta", 49:"", 50:"Simpang (belum diketahui)"
+  41:"Taman Siswa 2", 42:"Simpang Boom Baru", 43:"", 44:"Simpang Kampus", 45:"Simpang Bandara", 46:"", 47:"Taman Siswa 3", 48:"Simpang Soekarno Hatta", 49:"", 50:"Simpang (belum diketahui)",
+  51:"Tol Palindra 01+600 A", 52:"Tol Palindra 01+600 B"
+};
+// ===== KAMERA TAMBAHAN (sumber stream lain): nomor: alamat .m3u8 =====
+const TAMBAHAN={
+  51:"https://pub.hk-opt.com/LiveApp/streams/267565493547947969759647.m3u8",
+  52:"https://pub.hk-opt.com/LiveApp/streams/000873119738804749935559.m3u8"
 };
 // =====================================================================
 // ===== KAMERA DISEMBUNYIKAN: nomor kamera yang tidak ditampilkan sama sekali =====
@@ -279,14 +285,14 @@ const fsOn=()=>{const d=document.documentElement,f=d.requestFullscreen||d.webkit
 const fsOff=()=>{const f=document.exitFullscreen||document.webkitExitFullscreen;if(f&&(document.fullscreenElement||document.webkitFullscreenElement))try{const p=f.call(document);if(p&&p.catch)p.catch(()=>{})}catch(e){}};
 const UA=navigator.userAgent,TV=/Android TV|GoogleTV|AFT[A-Z]|BRAVIA|SmartTV|SMART-TV|Tizen|Web0S|webOS|HbbTV|CrKey|\bTV\b/i.test(UA);
 let LITE=TV;try{const l=localStorage.getItem('cctvLite');if(l!=null)LITE=l==='1'}catch(e){}
-const N=50, url=i=>`https://stream.palembang.go.id/cam${i}/main_stream.m3u8`;
+const N=Math.max(50,...Object.keys(TAMBAHAN).map(Number)), url=i=>TAMBAHAN[i]||`https://stream.palembang.go.id/cam${i}/main_stream.m3u8`;
 const cams=Array.from({length:N},(_,k)=>({i:k+1,status:'cek',visible:false,hls:null}));
 const grid=document.getElementById('grid'), $=id=>document.getElementById(id);
 const ord=[...new Set(URUTAN.filter(i=>i>=1&&i<=N))];for(let i=1;i<=N;i++)if(!ord.includes(i))ord.push(i);
 for(const h of SEMBUNYI){const k=ord.indexOf(h);if(k>=0)ord.splice(k,1)}
 const urut=ord.map(i=>cams[i-1]);
 let filter='on',saved={};
-try{saved=JSON.parse(localStorage.getItem('cctvNama')||'{}')}catch(e){}
+try{saved=JSON.parse(localStorage.getItem('cctvNama')||'{}');if(saved[24]==='Darma Agung (KM 17)')delete saved[24]}catch(e){}
 const nama=i=>saved[i]||LOKASI[i]||'';
 const esc=t=>String(t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 try{filter=localStorage.getItem('cctvFilter')||'on';$('max').value=localStorage.getItem('cctvMaks')||(LITE?'1':'9')}catch(e){}
