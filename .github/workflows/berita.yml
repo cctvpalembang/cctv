@@ -25,13 +25,17 @@ jobs:
         env:
           TOMTOM_KEY: ${{ secrets.TOMTOM_KEY || secrets.APIKEY }}
           GOOGLE_ROUTES_KEY: ${{ secrets.GOOGLE_ROUTES_KEY || secrets.APIKEYCCTV }}
+      - name: Titik api NASA FIRMS (Sumsel)
+        run: python3 scripts/titik_api.py hotspot.json
+        continue-on-error: true
       - name: Commit jika berubah
         run: |
           git add news.json
           [ -f ruas.json ] && git add ruas.json
+          [ -f hotspot.json ] && git add hotspot.json
           if git diff --cached --quiet; then echo "tidak ada perubahan"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Perbarui news.json / ruas.json"
+          git commit -m "Perbarui news.json / ruas.json / hotspot.json"
           git pull --rebase origin main
           git push
