@@ -190,7 +190,7 @@ footer a{color:inherit}
   <button id="fOff" aria-pressed="false">Offline</button>
   <input id="q" type="search" placeholder="Cari nomor / lokasi" aria-label="Cari nomor kamera atau lokasi">
   <label class="inl" for="max">Maks. diputar
-    <select id="max"><option>1</option><option>2</option><option>4</option><option selected>6</option><option>9</option><option>12</option><option>20</option></select>
+    <select id="max"><option>1</option><option>2</option><option>4</option><option>6</option><option selected>9</option><option>12</option><option>20</option></select>
   </label>
   <details class="more"><summary>⋯ Lainnya</summary><div class="menu">
   <button id="lite" aria-pressed="false" title="Untuk TV / perangkat lemah: 1 video sekaligus, pratinjau tur tanpa video">Mode ringan (TV)</button>
@@ -271,7 +271,7 @@ let filter='on',saved={};
 try{saved=JSON.parse(localStorage.getItem('cctvNama')||'{}')}catch(e){}
 const nama=i=>saved[i]||LOKASI[i]||'';
 const esc=t=>String(t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-try{filter=localStorage.getItem('cctvFilter')||'on';$('max').value=localStorage.getItem('cctvMax')||(LITE?'1':'6')}catch(e){}
+try{filter=localStorage.getItem('cctvFilter')||'on';$('max').value=localStorage.getItem('cctvMaks')||(LITE?'1':'9')}catch(e){}
 
 grid.innerHTML=urut.map(c=>`<article class="cam" id="c${c.i}" data-i="${c.i}">
 <div class="scr" tabindex="0" role="button" aria-label="Perbesar kamera ${c.i}"><video muted playsinline></video><div class="msg">Memeriksa…</div></div>
@@ -554,7 +554,7 @@ document.addEventListener('keydown',e=>{if(!tOn)return;
 const setF=f=>{filter=f;try{localStorage.setItem('cctvFilter',f)}catch(e){}apply()};
 $('fOn').onclick=()=>setF('on');$('fAll').onclick=()=>setF('all');$('fOff').onclick=()=>setF('off');
 $('q').oninput=apply;
-$('max').onchange=()=>{try{localStorage.setItem('cctvMax',$('max').value)}catch(e){}schedule()};
+$('max').onchange=()=>{try{localStorage.setItem('cctvMaks',$('max').value)}catch(e){}schedule()};
 $('re').onclick=probeAll;
 document.addEventListener('visibilitychange',()=>{paused=document.hidden||dlg.open||tOn;schedule()});
 // ===== CCTV BANYUASIN: nomor kamera dan nama lokasinya (nomor: "nama") =====
@@ -571,7 +571,7 @@ function setW(w){wil=w;try{localStorage.setItem('cctvWil',w)}catch(e){}
 $('wAll').onclick=()=>setW('all');$('wPlg').onclick=()=>setW('plg');$('wBya').onclick=()=>setW('bya');
 setW(wil);
 $('lite').setAttribute('aria-pressed',LITE);
-$('lite').onclick=()=>{LITE=!LITE;try{localStorage.setItem('cctvLite',LITE?'1':'0');localStorage.setItem('cctvMax',LITE?'1':'6')}catch(e){}location.reload()};
+$('lite').onclick=()=>{LITE=!LITE;try{localStorage.setItem('cctvLite',LITE?'1':'0');localStorage.setItem('cctvMaks',LITE?'1':'9')}catch(e){}location.reload()};
 {const v=document.createElement('video');const d=document.createElement('span');d.id='diag';
  d.textContent=' · Kompatibilitas: HLS.js '+(window.Hls&&Hls.isSupported()?'ya':'tidak')+', HLS bawaan '+(v.canPlayType('application/vnd.apple.mpegurl')?'ya':'tidak')+(TV?', TV terdeteksi':'')+(LITE?', mode ringan aktif':'');
  document.querySelector('footer').append(d)}
