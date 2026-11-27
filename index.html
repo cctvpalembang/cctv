@@ -154,6 +154,11 @@ footer a{color:inherit}
 #tkDate{font-size:14px}#tkWx{font-size:13px}
 .tick .tvw{height:34px;flex:none;width:100%}
 @media(max-width:600px){.tick .tleft .tsrc{display:none}#tkDate,#tkWx{font-size:11px}}
+#tkRuas{font:600 13px Inter,sans-serif;transition:opacity .4s;white-space:nowrap}
+#tkRuas[hidden],#tkRuasSep[hidden]{display:none}
+#tkRuas b{background:#fff;color:var(--hot);border-radius:4px;padding:1px 5px;margin-right:4px;font-size:11px}
+#tkRuas .mp{background:#7b1f1f;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px}
+@media(max-width:900px){#tkRuas,#tkRuasSep{display:none!important}}
 #tkAqi{font:600 13px Inter,sans-serif;display:flex;align-items:center;gap:5px}
 #tkAqi i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid #fff}
 @media(max-width:600px){#tkAqi{font-size:11px}}
@@ -195,7 +200,7 @@ footer a{color:inherit}
   <button id="logout">Keluar akun</button>
   <button id="cp" title="Salin semua nama lokasi sebagai kode LOKASI">Salin daftar nama</button>
   </div></details>
-  <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tleft"><div id="tkDate">–</div><span class="tsep">·</span><div id="tkWx" aria-live="off">Memuat cuaca…</div><span class="tsep">·</span><div id="tkAqi" title="Kualitas udara Palembang (US AQI, Open-Meteo)">AQI…</div><span class="sp"></span><div class="tsrc" id="tkSrc"></div></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
+  <div id="tick" class="tick" aria-label="Tanggal dan berita terkini"><div class="tleft"><div id="tkDate">–</div><span class="tsep">·</span><div id="tkWx" aria-live="off">Memuat cuaca…</div><span class="tsep">·</span><div id="tkAqi" title="Kualitas udara Palembang (US AQI, Open-Meteo)">AQI…</div><span class="tsep" id="tkRuasSep" hidden>·</span><div id="tkRuas" hidden title="Kondisi ruas jalan nasional (TomTom Traffic)"></div><span class="sp"></span><div class="tsrc" id="tkSrc"></div></div><div class="tvw"><div class="trk" id="tkTrk"><span>Memuat berita…</span></div></div></div>
 </div>
 <main>
 <section class="rg" id="rPlg"><h2 class="reg">Kota Palembang</h2><div class="grid" id="grid"></div></section>
@@ -626,6 +631,18 @@ const KOTA_CUACA=[["Palembang",-2.976,104.775],["Lubuklinggau",-3.296,102.861],[
     $('tkAqi').title='Kualitas udara Palembang · US AQI '+v+' · PM2.5 '+(pm!=null?pm.toFixed(1):'–')+' µg/m³ (Open-Meteo, perkiraan model)'}
     catch(e){$('tkAqi').textContent='AQI belum tersedia'}};
   load();setInterval(load,30*60000);
+}
+// ===== KONDISI RUAS JALAN NASIONAL per PPK (ruas.json dari TomTom, diperbarui GitHub Actions tiap 30 menit) =====
+{
+  let list=[],k=0;const el=$('tkRuas');
+  const jam=m=>m>=60?Math.floor(m/60)+' j '+(m%60)+' mnt':m+' mnt';
+  const show=()=>{if(!list.length)return;const x=list[k++%list.length];el.style.opacity=0;
+    setTimeout(()=>{el.innerHTML=`<b>PPK ${esc(x.ppk)}</b>${esc(x.arah)}: ${jam(x.waktu_menit)} · ±${x.kecepatan} km/jam · ${String(x.jarak_km).replace('.',',')} km`+
+      (x.macet_parah_km>=0.1?`<span class="mp">Macet parah ${String(x.macet_parah_km).replace('.',',')} km</span>`:` · ${esc(x.kategori)}`);el.style.opacity=1},300)};
+  const load=async()=>{for(const u of ['https://raw.githubusercontent.com/cctvpalembang/cctv/main/ruas.json','ruas.json'])try{
+      const j=await (await fetch(u,{cache:'no-store'})).json();const nl=[];j.ruas.forEach(r=>r.arah.forEach(a=>nl.push(Object.assign({ppk:r.ppk},a))));
+      if(!nl.length)continue;const first=!list.length;list=nl;el.hidden=false;$('tkRuasSep').hidden=false;if(first)show();return}catch(e){}};
+  load();setInterval(load,10*60000);setInterval(show,6000);
 }
 // ===== KATA SANDI (disimpan sebagai hash SHA-256, bukan teks asli) =====
 const PW_HASH='cb9d6474b7f197857cfc7bc9cef737655c8cc3cd25bc586936d20c3cd90c574f';

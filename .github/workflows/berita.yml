@@ -18,12 +18,19 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: python3 scripts/berita.py news.json
+        continue-on-error: true
+      - name: Kondisi ruas (TomTom)
+        run: python3 scripts/ruas.py ruas.json
+        continue-on-error: true
+        env:
+          TOMTOM_KEY: ${{ secrets.TOMTOM_KEY }}
       - name: Commit jika berubah
         run: |
-          if git diff --quiet -- news.json && git ls-files --error-unmatch news.json >/dev/null 2>&1; then echo "tidak ada perubahan"; exit 0; fi
+          git add news.json
+          [ -f ruas.json ] && git add ruas.json
+          if git diff --cached --quiet; then echo "tidak ada perubahan"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add news.json
-          git commit -m "Perbarui news.json"
+          git commit -m "Perbarui news.json / ruas.json"
           git pull --rebase origin main
           git push
