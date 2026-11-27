@@ -61,9 +61,29 @@ def olah(route):
 def rute(key, titik):
     loc = ":".join("%f,%f" % (a, b) for a, b in titik)
     q = urllib.parse.urlencode({"key": key, "traffic": "true", "travelMode": "car", "routeType": "fastest",
-                                "sectionType": "traffic", "computeTravelTimeFor": "all", "language": "id-ID"})
+                                "sectionType": "traffic", "computeTravelTimeFor": "all", "language": "id-ID",
+                                "avoid": "tollRoads"})  # jalan nasional, bukan tol sejajar
     url = "https://api.tomtom.com/routing/1/calculateRoute/%s/json?%s" % (urllib.parse.quote(loc, safe=",:"), q)
     return json.load(urllib.request.urlopen(url, timeout=60))["routes"][0]
+
+
+# titik macet yang pernah teramati (sheet "Titik Macet" di analisa_lalu_lintas.xlsx aplikasi overlay)
+TITIK = [("1.5", "Sukomoro – Talang Betutu (KM 15–20)", -2.913, 104.640),
+         ("1.5", "Sisi barat Sukomoro (KM 18–20)", -2.912, 104.620),
+         ("1.2", "Kota Betung (KM 69–71)", -2.836, 104.222),
+         ("1.2", "Pasar Sungai Lilin (KM 112,6)", -2.6020, 104.1097),
+         ("1.1", "Kota Bayung Lencir", -2.015, 103.699)]
+
+
+def aliran(key, lat, lng):
+    q = urllib.parse.urlencode({"key": key, "point": "%f,%f" % (lat, lng), "unit": "KMPH"})
+    d = json.load(urllib.request.urlopen("https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/12/json?" + q,
+                                         timeout=30))["flowSegmentData"]
+    cur, free = d.get("currentSpeed", 0), d.get("freeFlowSpeed", 0) or 1
+    r = cur / free
+    kat = "Lancar" if r >= .85 else "Ramai lancar" if r >= .65 else "Padat" if r >= .45 else "Macet" if r >= .25 else "Macet parah"
+    return {"kecepatan": cur, "normal": free, "kategori": "Ditutup" if d.get("roadClosure") else kat,
+            "keyakinan": round(d.get("confidence", 0), 2)}
 
 
 def main(out_path):
@@ -86,8 +106,14 @@ def main(out_path):
             hasil.append({"ppk": s["ppk"], "nama": s["nama"], "arah": arah})
     if not hasil:
         sys.exit("semua permintaan TomTom gagal; ruas.json tidak diubah")
+    titik = []
+    for ppk, nama, lat, lng in TITIK:
+        try:
+            titik.append(dict(ppk=ppk, nama=nama, **aliran(key, lat, lng)))
+        except Exception as e:
+            print("gagal titik", nama, e, file=sys.stderr)
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump({"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "sumber": "TomTom Traffic", "ruas": hasil},
+        json.dump({"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "sumber": "TomTom Traffic", "ruas": hasil, "titik": titik},
                   f, ensure_ascii=False, indent=1)
     print(len(hasil), "ruas ditulis,", gagal, "gagal")
 
