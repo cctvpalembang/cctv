@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T03:40:03Z",
+ "updated": "2026-11-27T05:32:26Z",
  "sumber": "Google",
  "ruas": [
   {
@@ -9,32 +9,32 @@
     {
      "arah": "Palembang → Betung",
      "jarak_km": 55.6,
-     "waktu_menit": 155,
-     "kecepatan": 21,
-     "tunda_menit": 47,
-     "macet_parah_km": 4.8,
+     "waktu_menit": 163,
+     "kecepatan": 20,
+     "tunda_menit": 55,
+     "macet_parah_km": 7.4,
      "macet_km": 0.0,
-     "padat_km": 2.3,
+     "padat_km": 3.5,
      "persen": {
-      "hijau": 87,
-      "oranye": 4,
-      "merah": 9
+      "hijau": 80,
+      "oranye": 6,
+      "merah": 13
      },
      "kategori": "Padat"
     },
     {
      "arah": "Betung → Palembang",
      "jarak_km": 55.6,
-     "waktu_menit": 165,
+     "waktu_menit": 164,
      "kecepatan": 20,
-     "tunda_menit": 58,
-     "macet_parah_km": 4.3,
+     "tunda_menit": 57,
+     "macet_parah_km": 5.5,
      "macet_km": 0.0,
-     "padat_km": 5.7,
+     "padat_km": 4.6,
      "persen": {
       "hijau": 82,
-      "oranye": 10,
-      "merah": 8
+      "oranye": 8,
+      "merah": 10
      },
      "kategori": "Padat"
     }
@@ -47,31 +47,31 @@
     {
      "arah": "Betung → Sei Lilin → Peninggalan",
      "jarak_km": 77.6,
-     "waktu_menit": 131,
-     "kecepatan": 36,
-     "tunda_menit": 5,
-     "macet_parah_km": 0.0,
+     "waktu_menit": 141,
+     "kecepatan": 33,
+     "tunda_menit": 16,
+     "macet_parah_km": 1.3,
      "macet_km": 0.0,
-     "padat_km": 1.1,
+     "padat_km": 2.4,
      "persen": {
-      "hijau": 99,
-      "oranye": 1,
-      "merah": 0
+      "hijau": 95,
+      "oranye": 3,
+      "merah": 2
      },
      "kategori": "Lancar"
     },
     {
      "arah": "Peninggalan → Sei Lilin → Betung",
      "jarak_km": 77.6,
-     "waktu_menit": 138,
+     "waktu_menit": 139,
      "kecepatan": 34,
      "tunda_menit": 19,
-     "macet_parah_km": 3.1,
+     "macet_parah_km": 3.5,
      "macet_km": 0.0,
-     "padat_km": 1.1,
+     "padat_km": 1.9,
      "persen": {
-      "hijau": 95,
-      "oranye": 1,
+      "hijau": 93,
+      "oranye": 3,
       "merah": 4
      },
      "kategori": "Ramai lancar"
@@ -85,15 +85,15 @@
     {
      "arah": "arah Jambi",
      "jarak_km": 89.0,
-     "waktu_menit": 150,
-     "kecepatan": 36,
-     "tunda_menit": 8,
-     "macet_parah_km": 0.4,
+     "waktu_menit": 141,
+     "kecepatan": 38,
+     "tunda_menit": 0,
+     "macet_parah_km": 0.0,
      "macet_km": 0.0,
-     "padat_km": 1.7,
+     "padat_km": 0.2,
      "persen": {
-      "hijau": 98,
-      "oranye": 2,
+      "hijau": 100,
+      "oranye": 0,
       "merah": 0
      },
      "kategori": "Lancar"
@@ -101,15 +101,15 @@
     {
      "arah": "arah Peninggalan",
      "jarak_km": 89.0,
-     "waktu_menit": 138,
-     "kecepatan": 39,
-     "tunda_menit": 5,
-     "macet_parah_km": 0.3,
+     "waktu_menit": 140,
+     "kecepatan": 38,
+     "tunda_menit": 6,
+     "macet_parah_km": 0.0,
      "macet_km": 0.0,
-     "padat_km": 2.6,
+     "padat_km": 0.3,
      "persen": {
-      "hijau": 97,
-      "oranye": 3,
+      "hijau": 100,
+      "oranye": 0,
       "merah": 0
      },
      "kategori": "Lancar"
@@ -117,5 +117,9 @@
    ]
   }
  ],
- "titik": []
+ "titik": [],
+ "kuota_google": {
+  "bulan": "2026-11",
+  "pakai": 6
+ }
 }
