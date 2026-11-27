@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T21:45:36Z",
+ "updated": "2026-11-27T23:45:33Z",
  "sumber": "Google",
  "ruas": [
   {
@@ -9,32 +9,32 @@
     {
      "arah": "Palembang → Betung",
      "jarak_km": 55.6,
-     "waktu_menit": 139,
-     "kecepatan": 24,
-     "tunda_menit": 30,
-     "macet_parah_km": 3.6,
+     "waktu_menit": 146,
+     "kecepatan": 23,
+     "tunda_menit": 37,
+     "macet_parah_km": 6.3,
      "macet_km": 0.0,
-     "padat_km": 2.8,
+     "padat_km": 3.8,
      "persen": {
-      "hijau": 89,
-      "oranye": 5,
-      "merah": 6
+      "hijau": 82,
+      "oranye": 7,
+      "merah": 11
      },
      "kategori": "Padat"
     },
     {
      "arah": "Betung → Palembang",
      "jarak_km": 55.6,
-     "waktu_menit": 144,
-     "kecepatan": 23,
-     "tunda_menit": 38,
-     "macet_parah_km": 4.0,
+     "waktu_menit": 149,
+     "kecepatan": 22,
+     "tunda_menit": 42,
+     "macet_parah_km": 5.0,
      "macet_km": 0.0,
-     "padat_km": 1.7,
+     "padat_km": 8.1,
      "persen": {
-      "hijau": 90,
-      "oranye": 3,
-      "merah": 7
+      "hijau": 76,
+      "oranye": 15,
+      "merah": 9
      },
      "kategori": "Padat"
     }
@@ -47,24 +47,24 @@
     {
      "arah": "Betung → Sei Lilin → Peninggalan",
      "jarak_km": 77.6,
-     "waktu_menit": 127,
-     "kecepatan": 37,
-     "tunda_menit": 1,
-     "macet_parah_km": 0.4,
+     "waktu_menit": 129,
+     "kecepatan": 36,
+     "tunda_menit": 4,
+     "macet_parah_km": 0.0,
      "macet_km": 0.0,
-     "padat_km": 0.7,
+     "padat_km": 0.3,
      "persen": {
-      "hijau": 99,
-      "oranye": 1,
-      "merah": 1
+      "hijau": 100,
+      "oranye": 0,
+      "merah": 0
      },
      "kategori": "Lancar"
     },
     {
      "arah": "Peninggalan → Sei Lilin → Betung",
      "jarak_km": 77.6,
-     "waktu_menit": 115,
-     "kecepatan": 40,
+     "waktu_menit": 118,
+     "kecepatan": 39,
      "tunda_menit": 0,
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
@@ -85,12 +85,12 @@
     {
      "arah": "Peninggalan → Batas Prov. Jambi",
      "jarak_km": 89.0,
-     "waktu_menit": 137,
-     "kecepatan": 39,
+     "waktu_menit": 142,
+     "kecepatan": 38,
      "tunda_menit": 0,
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
-     "padat_km": 0.0,
+     "padat_km": 0.4,
      "persen": {
       "hijau": 100,
       "oranye": 0,
@@ -101,8 +101,8 @@
     {
      "arah": "Batas Prov. Jambi → Peninggalan",
      "jarak_km": 89.0,
-     "waktu_menit": 128,
-     "kecepatan": 42,
+     "waktu_menit": 133,
+     "kecepatan": 40,
      "tunda_menit": 0,
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
@@ -120,6 +120,6 @@
  "titik": [],
  "kuota_google": {
   "bulan": "2026-11",
-  "pakai": 42
+  "pakai": 48
  }
 }
