@@ -618,7 +618,8 @@ const BERITA={url:'https://raw.githubusercontent.com/cctvpalembang/cctv/main/new
   tick();setInterval(tick,15000);
   $('tkSrc').textContent=BERITA.nama;
   const show=items=>{const trk=$('tkTrk');
-    const html=items.map(x=>x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.title)}${x.source?' <small style="color:#8fb3c0;font-weight:400">· '+esc(x.source)+'</small>':''}</a>`:`<span>${esc(x.title)}</span>`).join('');
+    const no=(i)=>items.length>1?`<b style="color:var(--hot)">(${i+1})</b> `:'';
+    const html=items.map((x,i)=>x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener">${no(i)}${esc(x.title)}${x.source?' <small style="color:#8fb3c0;font-weight:400">· '+esc(x.source)+'</small>':''}</a>`:`<span>${no(i)}${esc(x.title)}</span>`).join('');
     trk.innerHTML=html+html; // digandakan supaya berjalan tanpa putus
     trk.style.setProperty('--dur',Math.max(20,items.reduce((n,x)=>n+x.title.length+6,0)*0.13)+'s')}; // ±70 piksel/detik
   const parse=t=>{t=t.trim();let out=[];
