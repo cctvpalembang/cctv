@@ -83,10 +83,13 @@ dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 @media(max-width:700px),(orientation:portrait){#tour{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 110px auto}.tside{flex-direction:row}.tside .tq{display:none}}
 @media(prefers-reduced-motion:reduce){.tprog{transition:none!important}}
 #tWall{display:none;grid-column:1/-1;gap:6px;min-height:0}
-#tour[data-mode="2"],#tour[data-mode="3"]{grid-template-rows:minmax(0,1fr) auto}
-#tour[data-mode="2"] .tmain,#tour[data-mode="2"] .tside,#tour[data-mode="3"] .tmain,#tour[data-mode="3"] .tside{display:none}
+#tour[data-mode="2"],#tour[data-mode="3"],#tour[data-mode="6"],#tour[data-mode="8"]{grid-template-rows:minmax(0,1fr) auto}
+#tour[data-mode="2"] .tmain,#tour[data-mode="2"] .tside,#tour[data-mode="3"] .tmain,#tour[data-mode="3"] .tside,#tour[data-mode="6"] .tmain,#tour[data-mode="6"] .tside,#tour[data-mode="8"] .tmain,#tour[data-mode="8"] .tside{display:none}
 #tour[data-mode="2"] #tWall{display:grid;grid-template:repeat(2,minmax(0,1fr))/repeat(2,minmax(0,1fr))}
 #tour[data-mode="3"] #tWall{display:grid;grid-template:repeat(3,minmax(0,1fr))/repeat(3,minmax(0,1fr))}
+#tour[data-mode="6"] #tWall{display:grid;grid-template:repeat(2,minmax(0,1fr))/repeat(3,minmax(0,1fr))}
+#tour[data-mode="8"] #tWall{display:grid;grid-template:repeat(2,minmax(0,1fr))/repeat(4,minmax(0,1fr))}
+@media(orientation:portrait){#tour[data-mode="6"] #tWall{grid-template:repeat(3,minmax(0,1fr))/repeat(2,minmax(0,1fr))}#tour[data-mode="8"] #tWall{grid-template:repeat(4,minmax(0,1fr))/repeat(2,minmax(0,1fr))}}
 .tc{position:relative;overflow:hidden;border-radius:10px;background:#021118;cursor:zoom-in;border:2px solid transparent}
 .tc:hover{border-color:#174556}
 .tc video{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover}
@@ -221,10 +224,12 @@ footer a{color:inherit}
     <button id="tPrev" aria-label="Kamera sebelumnya">‹ Sebelumnya</button>
     <button id="tPlay">⏸ Jeda</button>
     <button id="tNext" aria-label="Kamera berikutnya">Berikutnya ›</button>
-    <label class="inl" for="tInt" style="color:#8fb3c0">Ganti tiap
-      <select id="tInt"><option value="5">5 detik</option><option value="8" selected>8 detik</option><option value="15">15 detik</option><option value="30">30 detik</option><option value="60">60 detik</option></select></label>
-    <label class="inl" for="tMode" style="color:#8fb3c0">Tampilan
-      <select id="tMode"><option value="1">Sorot + 3 berikutnya</option><option value="2">Kuad 2×2 (ganti per halaman)</option><option value="3">Dinding 3×3 (bergulir)</option></select></label>
+    <button id="tIntBtn" title="Lama tiap giliran — tekan untuk mengganti">⏱ 8 detik</button>
+    <button id="tModeBtn" title="Jenis tampilan — tekan untuk mengganti">▦ Sorot</button>
+    <label class="inl" for="tInt" style="color:#8fb3c0" hidden>Ganti tiap
+      <select id="tInt"><option value="5">5 detik</option><option value="8" selected>8 detik</option><option value="15">15 detik</option><option value="30">30 detik</option><option value="60">1 menit</option><option value="90">1,5 menit</option><option value="120">2 menit</option><option value="180">3 menit</option><option value="300">5 menit</option></select></label>
+    <label class="inl" for="tMode" style="color:#8fb3c0" hidden>Tampilan
+      <select id="tMode"><option value="1">Sorot + 3 berikutnya</option><option value="2">Kuad 2×2 (ganti per halaman)</option><option value="6">6 kamera 3×2 (ganti per halaman)</option><option value="8">8 kamera 4×2 (ganti per halaman)</option><option value="3">Dinding 3×3 (bergulir)</option></select></label>
     <span class="sp"></span>
     <span id="tClk2"></span>
     <span id="tPos" style="color:#8fb3c0;font-size:14px"></span>
@@ -493,20 +498,21 @@ function tVideo(i){
 }
 let tMode='1',tWallIds=[],tSlot=0,tFresh=-1;const tWall=$('tWall');
 try{tMode=localStorage.getItem('cctvTMode')||'1';$('tMode').value=tMode}catch(e){}
+const HAL={'2':4,'6':6,'8':8};// mode per halaman: jumlah kamera per halaman
 function tRenderWall(){
-  const n=tList.length;let ids;
-  if(tMode==='2'){ids=[0,1,2,3].slice(0,Math.min(4,n)).map(k=>tList[(tPos+k)%n]);tFresh=-1}
+  const n=tList.length,h=HAL[tMode];let ids;
+  if(h){ids=tList.slice(tPos,tPos+h);if(ids.length<h&&n>h)ids=tList.slice(Math.max(0,n-h));tFresh=-1}
   else{if(!tWallIds.length){tWallIds=[...Array(Math.min(9,n)).keys()].map(k=>tList[(tPos+k)%n]);tSlot=0;tFresh=-1}ids=tWallIds}
   for(const [i,e] of pool)if(!ids.includes(i)){e.h&&e.h.destroy();e.v.remove();pool.delete(i)}
   tWall.replaceChildren(...ids.map((i,k)=>{const d=document.createElement('div');d.className='tc'+(k===tFresh?' fresh':'');d.title='Sorot kamera ini';
     d.append(tVideo(i).v);const sp=document.createElement('span');sp.textContent=label(i);d.append(sp);
     d.onclick=()=>{tPos=tList.indexOf(i);setTMode('1')};return d}));
   for(const e of pool.values())pl(e.v);
-  $('tPos').textContent=tMode==='2'?'Halaman '+(Math.floor(tPos/4)+1)+' / '+Math.ceil(n/4):n+' kamera · 1 berganti tiap giliran';
+  $('tPos').textContent=h?'Halaman '+(Math.floor(tPos/h)+1)+' / '+Math.ceil(n/h):n+' kamera · 1 berganti tiap giliran';
   tKick();
 }
 function setTMode(m){tMode=m;$('tMode').value=m;try{localStorage.setItem('cctvTMode',m)}catch(e){}
-  tWallIds=[];if(m==='2')tPos=Math.floor(tPos/4)*4;tour.dataset.mode=m;if(tOn)tRender()}
+  tWallIds=[];if(HAL[m])tPos=Math.floor(tPos/HAL[m])*HAL[m];tour.dataset.mode=m;if(tOn)tRender()}
 function tRender(){
   if(!tList.length){$('tName').textContent='Tidak ada kamera online';return}
   tour.dataset.mode=tMode;tWall.replaceChildren();
@@ -529,7 +535,7 @@ function tKick(){
 }
 function tGo(d){if(!tList.length)return;const n=tList.length;
   if(tMode==='3'&&d===1&&n>9&&tWallIds.length){tPos=(tPos+1)%n;tWallIds[tSlot]=tList[(tPos+8)%n];tFresh=tSlot;tSlot=(tSlot+1)%9;tRenderWall();return}
-  const st=tMode==='2'?4:1;tPos=((tPos+d*st)%n+n)%n;tWallIds=[];tRender()}
+  const st=HAL[tMode]||1;if(st>1){const pg=Math.ceil(n/st);tPos=((Math.floor(tPos/st)+d)%pg+pg)%pg*st}else tPos=((tPos+d)%n+n)%n;tWallIds=[];tRender()}
 function tClock(){$('tClk2').textContent=$('tClock').textContent=new Date().toLocaleString('id-ID',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 let clk=null;
 function tourOpen(){
@@ -550,6 +556,10 @@ $('tX').onclick=tourClose;$('tMode').onchange=()=>setTMode($('tMode').value);$('
 $('tPlay').onclick=()=>{tRun=!tRun;$('tPlay').textContent=tRun?'⏸ Jeda':'▶ Lanjut';tKick()};
 $('tInt').onchange=()=>{try{localStorage.setItem('cctvInt',$('tInt').value)}catch(e){}tKick()};
 try{const v=localStorage.getItem('cctvInt');if(v)$('tInt').value=v}catch(e){}
+// Tombol putar-pilihan (mudah dengan remote TV): sekali tekan = pilihan berikutnya
+const putar=(sel,btn,ikon,singkat)=>{const s=$(sel),b=$(btn),upd=()=>{const o=s.options[s.selectedIndex];b.textContent=ikon+' '+(singkat?singkat(o):o.text)};
+  b.onclick=()=>{s.selectedIndex=(s.selectedIndex+1)%s.options.length;s.onchange();upd()};upd();s.addEventListener('change',upd)};
+putar('tInt','tIntBtn','⏱');putar('tMode','tModeBtn','▦',o=>o.text.replace(/ \(.*\)/,''));
 $('tFs').onclick=()=>{if(document.fullscreenElement||document.webkitFullscreenElement)fsOff();else fsOn()};
 ths.forEach(t=>{const go=()=>t.dataset.k&&tGo(+t.dataset.k);t.onclick=go;t.onkeydown=e=>{if(e.key==='Enter')go()}});
 tMain.onclick=()=>$('tPlay').click();
