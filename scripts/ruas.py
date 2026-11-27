@@ -151,8 +151,9 @@ def google(key, titik):
             "kategori": kategori_warna(p_slow, p_jam)}
 
 
-# Google hanya jam 05.00-20.59 WIB: 16 run x 6 = 96 request/hari (kuota harian Google 100)
-JAM_GOOGLE = (5, 20)
+# Jam (WIB) Google dipanggil: tiap jam saat jam sibuk 06-09 & 16-19, selebihnya tiap 2 jam.
+# 16 run x 6 = 96 request/hari (kuota harian Google 100), +-2.900/bulan (gratis 5.000).
+JAM_GOOGLE = {6, 7, 8, 9, 16, 17, 18, 19, 0, 2, 4, 10, 12, 14, 20, 22}
 BATAS_GOOGLE = int(os.environ.get("BATAS_GOOGLE", "4500"))
 
 
@@ -171,14 +172,12 @@ def main(out_path):
         print("kuota Google bulan ini sudah %d request; pakai TomTom sampai bulan depan" % kuota["pakai"])
         gkey = ""
     jam_wib = (time.gmtime().tm_hour + 7) % 24
-    if gkey and not (JAM_GOOGLE[0] <= jam_wib <= JAM_GOOGLE[1]) and not os.environ.get("PAKSA"):
-        print("di luar jam Google (%02d WIB); pakai TomTom" % jam_wib)
-        gkey = ""
     if gkey:
-        try:  # Google maks. 1x per jam (kuota gratis)
+        try:  # Google maks. 1x per jam di jam terjadwal; di luar itu data Google lama dipertahankan
             lama = json.load(open(out_path, encoding="utf-8"))
             umur = time.time() - time.mktime(time.strptime(lama["updated"], "%Y-%m-%dT%H:%M:%SZ")) + time.timezone
-            if lama.get("sumber") == "Google" and umur < 50 * 60 and not os.environ.get("PAKSA"):
+            batas = 50 if jam_wib in JAM_GOOGLE else 130
+            if lama.get("sumber") == "Google" and umur < batas * 60 and not os.environ.get("PAKSA"):
                 print("data Google masih baru (%d menit); dilewati" % (umur // 60))
                 return
         except Exception:
