@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T19:45:33Z",
+ "updated": "2026-11-27T21:45:36Z",
  "sumber": "Google",
  "ruas": [
   {
@@ -9,31 +9,31 @@
     {
      "arah": "Palembang → Betung",
      "jarak_km": 55.6,
-     "waktu_menit": 141,
+     "waktu_menit": 139,
      "kecepatan": 24,
-     "tunda_menit": 32,
-     "macet_parah_km": 8.1,
+     "tunda_menit": 30,
+     "macet_parah_km": 3.6,
      "macet_km": 0.0,
-     "padat_km": 4.1,
+     "padat_km": 2.8,
      "persen": {
-      "hijau": 78,
-      "oranye": 7,
-      "merah": 15
+      "hijau": 89,
+      "oranye": 5,
+      "merah": 6
      },
      "kategori": "Padat"
     },
     {
      "arah": "Betung → Palembang",
      "jarak_km": 55.6,
-     "waktu_menit": 153,
-     "kecepatan": 22,
-     "tunda_menit": 46,
-     "macet_parah_km": 4.2,
+     "waktu_menit": 144,
+     "kecepatan": 23,
+     "tunda_menit": 38,
+     "macet_parah_km": 4.0,
      "macet_km": 0.0,
-     "padat_km": 6.0,
+     "padat_km": 1.7,
      "persen": {
-      "hijau": 82,
-      "oranye": 11,
+      "hijau": 90,
+      "oranye": 3,
       "merah": 7
      },
      "kategori": "Padat"
@@ -47,16 +47,16 @@
     {
      "arah": "Betung → Sei Lilin → Peninggalan",
      "jarak_km": 77.6,
-     "waktu_menit": 125,
+     "waktu_menit": 127,
      "kecepatan": 37,
-     "tunda_menit": 0,
-     "macet_parah_km": 0.0,
+     "tunda_menit": 1,
+     "macet_parah_km": 0.4,
      "macet_km": 0.0,
-     "padat_km": 0.3,
+     "padat_km": 0.7,
      "persen": {
-      "hijau": 100,
-      "oranye": 0,
-      "merah": 0
+      "hijau": 99,
+      "oranye": 1,
+      "merah": 1
      },
      "kategori": "Lancar"
     },
@@ -85,8 +85,8 @@
     {
      "arah": "Peninggalan → Batas Prov. Jambi",
      "jarak_km": 89.0,
-     "waktu_menit": 133,
-     "kecepatan": 40,
+     "waktu_menit": 137,
+     "kecepatan": 39,
      "tunda_menit": 0,
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
@@ -101,15 +101,15 @@
     {
      "arah": "Batas Prov. Jambi → Peninggalan",
      "jarak_km": 89.0,
-     "waktu_menit": 126,
+     "waktu_menit": 128,
      "kecepatan": 42,
      "tunda_menit": 0,
      "macet_parah_km": 0.0,
      "macet_km": 0.0,
-     "padat_km": 0.5,
+     "padat_km": 0.3,
      "persen": {
-      "hijau": 99,
-      "oranye": 1,
+      "hijau": 100,
+      "oranye": 0,
       "merah": 0
      },
      "kategori": "Lancar"
@@ -120,6 +120,6 @@
  "titik": [],
  "kuota_google": {
   "bulan": "2026-11",
-  "pakai": 36
+  "pakai": 42
  }
 }
