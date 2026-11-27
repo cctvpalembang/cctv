@@ -30,6 +30,7 @@ button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var
 :focus-visible{outline:3px solid var(--hot);outline-offset:2px}
 input{width:150px}
 label.inl{display:flex;gap:8px;align-items:center;color:var(--mute);font-size:15px}
+label.inl[hidden]{display:none}
 main{padding:6px max(2vw,12px) 40px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
 .cam{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
@@ -189,7 +190,8 @@ footer a{color:inherit}
   <button id="fAll" aria-pressed="false">Semua</button>
   <button id="fOff" aria-pressed="false">Offline</button>
   <input id="q" type="search" placeholder="Cari nomor / lokasi" aria-label="Cari nomor kamera atau lokasi">
-  <label class="inl" for="max">Maks. diputar
+  <button id="maxBtn" title="Jumlah kamera yang diputar bersamaan. Tekan untuk mengganti (1 → 4 → 6 → 9 → 12 → 20)">Diputar: 9</button>
+  <label class="inl" for="max" hidden>Maks. diputar
     <select id="max"><option>1</option><option>2</option><option>4</option><option>6</option><option selected>9</option><option>12</option><option>20</option></select>
   </label>
   <details class="more"><summary>⋯ Lainnya</summary><div class="menu">
@@ -554,7 +556,10 @@ document.addEventListener('keydown',e=>{if(!tOn)return;
 const setF=f=>{filter=f;try{localStorage.setItem('cctvFilter',f)}catch(e){}apply()};
 $('fOn').onclick=()=>setF('on');$('fAll').onclick=()=>setF('all');$('fOff').onclick=()=>setF('off');
 $('q').oninput=apply;
-$('max').onchange=()=>{try{localStorage.setItem('cctvMaks',$('max').value)}catch(e){}schedule()};
+$('max').onchange=()=>{try{localStorage.setItem('cctvMaks',$('max').value)}catch(e){}$('maxBtn').textContent='Diputar: '+$('max').value;schedule()};
+// Tombol jumlah diputar: sekali tekan = pilihan berikutnya (mudah dengan remote TV)
+$('maxBtn').textContent='Diputar: '+$('max').value;
+$('maxBtn').onclick=()=>{const p=['1','4','6','9','12','20'],s=$('max');s.value=p[(p.indexOf(s.value)+1)%p.length];s.onchange()};
 $('re').onclick=probeAll;
 document.addEventListener('visibilitychange',()=>{paused=document.hidden||dlg.open||tOn;schedule()});
 // ===== CCTV BANYUASIN: nomor kamera dan nama lokasinya (nomor: "nama") =====
