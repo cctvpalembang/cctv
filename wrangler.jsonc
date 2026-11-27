@@ -1,9 +1,15 @@
-// Konfigurasi Cloudflare Workers: menyajikan isi repo sebagai situs statis (index.html, news.json).
+// Konfigurasi Cloudflare Workers: menyajikan isi repo sebagai situs statis (index.html, news.json),
+// plus jadwal cadangan tiap 30 menit yang memicu GitHub Actions "Perbarui pita berita".
 {
   "name": "cctv",
+  "main": "worker.js",
   "compatibility_date": "2026-11-01",
   "assets": {
     "directory": ".",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
+  },
+  "triggers": {
+    "crons": ["2,32 * * * *"]
   }
 }
