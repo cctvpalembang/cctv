@@ -24,7 +24,7 @@ jobs:
         continue-on-error: true
         env:
           TOMTOM_KEY: ${{ secrets.TOMTOM_KEY || secrets.APIKEY }}
-          GOOGLE_ROUTES_KEY: ${{ secrets.GOOGLE_ROUTES_KEY }}
+          GOOGLE_ROUTES_KEY: ${{ secrets.GOOGLE_ROUTES_KEY || secrets.APIKEYCCTV }}
       - name: Commit jika berubah
         run: |
           git add news.json
