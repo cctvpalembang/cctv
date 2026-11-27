@@ -151,6 +151,8 @@ def google(key, titik):
             "kategori": kategori_warna(p_slow, p_jam)}
 
 
+# Google hanya jam 05.00-20.59 WIB: 16 run x 6 = 96 request/hari (kuota harian Google 100)
+JAM_GOOGLE = (5, 20)
 BATAS_GOOGLE = int(os.environ.get("BATAS_GOOGLE", "4500"))
 
 
@@ -167,6 +169,10 @@ def main(out_path):
         kuota = {"bulan": bulan, "pakai": 0}
     if gkey and kuota["pakai"] + 6 > BATAS_GOOGLE:
         print("kuota Google bulan ini sudah %d request; pakai TomTom sampai bulan depan" % kuota["pakai"])
+        gkey = ""
+    jam_wib = (time.gmtime().tm_hour + 7) % 24
+    if gkey and not (JAM_GOOGLE[0] <= jam_wib <= JAM_GOOGLE[1]) and not os.environ.get("PAKSA"):
+        print("di luar jam Google (%02d WIB); pakai TomTom" % jam_wib)
         gkey = ""
     if gkey:
         try:  # Google maks. 1x per jam (kuota gratis)
