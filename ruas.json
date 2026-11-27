@@ -1,0 +1,90 @@
+{
+ "updated": "2026-11-27T03:19:48Z",
+ "sumber": "TomTom Traffic",
+ "ruas": [
+  {
+   "ppk": "1.5",
+   "nama": "Betung – Bts. Kota Palembang",
+   "arah": [
+    {
+     "arah": "Palembang → Betung",
+     "jarak_km": 59.3,
+     "waktu_menit": 117,
+     "kecepatan": 30,
+     "tunda_menit": 4,
+     "macet_parah_km": 0.0,
+     "macet_km": 0.8,
+     "padat_km": 0.9,
+     "kategori": "Padat"
+    },
+    {
+     "arah": "Betung → Palembang",
+     "jarak_km": 58.2,
+     "waktu_menit": 118,
+     "kecepatan": 30,
+     "tunda_menit": 1,
+     "macet_parah_km": 0.1,
+     "macet_km": 0.0,
+     "padat_km": 0.0,
+     "kategori": "Ramai lancar"
+    }
+   ]
+  },
+  {
+   "ppk": "1.2",
+   "nama": "Sei Lilin – Betung / Peninggalan – Sei Lilin",
+   "arah": [
+    {
+     "arah": "Betung → Sei Lilin → Peninggalan",
+     "jarak_km": 77.4,
+     "waktu_menit": 118,
+     "kecepatan": 39,
+     "tunda_menit": 0,
+     "macet_parah_km": 0.0,
+     "macet_km": 0.0,
+     "padat_km": 0.0,
+     "kategori": "Ramai lancar"
+    },
+    {
+     "arah": "Peninggalan → Sei Lilin → Betung",
+     "jarak_km": 77.4,
+     "waktu_menit": 111,
+     "kecepatan": 42,
+     "tunda_menit": 0,
+     "macet_parah_km": 0.0,
+     "macet_km": 0.0,
+     "padat_km": 0.0,
+     "kategori": "Ramai lancar"
+    }
+   ]
+  },
+  {
+   "ppk": "1.1",
+   "nama": "Bts. Prov. Jambi – Peninggalan",
+   "arah": [
+    {
+     "arah": "arah Jambi",
+     "jarak_km": 88.9,
+     "waktu_menit": 128,
+     "kecepatan": 42,
+     "tunda_menit": 0,
+     "macet_parah_km": 0.0,
+     "macet_km": 0.0,
+     "padat_km": 0.0,
+     "kategori": "Ramai lancar"
+    },
+    {
+     "arah": "arah Peninggalan",
+     "jarak_km": 88.9,
+     "waktu_menit": 119,
+     "kecepatan": 45,
+     "tunda_menit": 0,
+     "macet_parah_km": 0.0,
+     "macet_km": 0.0,
+     "padat_km": 0.0,
+     "kategori": "Lancar"
+    }
+   ]
+  }
+ ]
+}
