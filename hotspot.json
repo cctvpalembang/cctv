@@ -1,20 +1,20 @@
 {
- "updated": "2026-11-28T04:45:29Z",
+ "updated": "2026-11-28T05:45:31Z",
  "sumber": "NASA FIRMS (VIIRS S-NPP, VIIRS NOAA-20, VIIRS NOAA-21, MODIS)",
- "jumlah": 22,
+ "jumlah": 17,
  "tinggi": 0,
  "teratas": [
   {
-   "daerah": "OKU",
-   "jumlah": 4
+   "daerah": "Musi Rawas",
+   "jumlah": 3
+  },
+  {
+   "daerah": "Muara Enim",
+   "jumlah": 2
   },
   {
    "daerah": "Musi Banyuasin",
-   "jumlah": 4
-  },
-  {
-   "daerah": "Musi Rawas",
-   "jumlah": 3
+   "jumlah": 2
   }
  ]
 }
