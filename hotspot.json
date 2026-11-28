@@ -1,7 +1,7 @@
 {
- "updated": "2026-11-28T09:45:32Z",
+ "updated": "2026-11-28T10:45:31Z",
  "sumber": "NASA FIRMS (VIIRS S-NPP, VIIRS NOAA-20, VIIRS NOAA-21, MODIS)",
- "jumlah": 14,
+ "jumlah": 19,
  "tinggi": 0,
  "teratas": [
   {
@@ -9,11 +9,11 @@
    "jumlah": 3
   },
   {
-   "daerah": "OKU",
+   "daerah": "Empat Lawang",
    "jumlah": 2
   },
   {
-   "daerah": "OKU Timur",
+   "daerah": "Muara Enim",
    "jumlah": 2
   }
  ]
