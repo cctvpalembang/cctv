@@ -51,6 +51,14 @@ main{padding:6px max(2vw,12px) 40px}
 @media(prefers-reduced-motion:reduce){.live .dot::before{animation:none}}
 dialog{border:0;padding:0;background:#000;width:min(96vw,1280px);border-radius:14px;color:#fff}
 dialog::backdrop{background:rgba(2,17,24,.85)}
+dialog.ls{width:min(96vw,760px);background:#06222e;color:#e6f4f9}
+.ls .lsb{max-height:min(75vh,720px);overflow:auto;padding:0 12px 12px}
+.ls table{width:100%;border-collapse:collapse;font:500 15px Inter,sans-serif}
+.ls th{position:sticky;top:0;background:#06222e;text-align:left;padding:8px 6px;color:#8fb3c0;font-weight:600}
+.ls td{padding:8px 6px;border-top:1px solid #12384a}
+.ls tbody tr{cursor:pointer}.ls tbody tr:hover,.ls tbody tr:focus{background:#0c3546;outline:none}
+.ls .st{font-weight:700;white-space:nowrap}.ls .st.on{color:#3ddc97}.ls .st.off{color:#ff6b6b}.ls .st.cek{color:#f2c200}.ls .st.lk{color:#8fb3c0}
+.ls small{color:#8fb3c0;font-weight:500}
 dialog video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .dh{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;gap:8px;font:500 16px "Space Grotesk",sans-serif}
 .dh{flex-wrap:wrap}.dh button{background:#0b3040;color:#fff;border-color:#174556}
@@ -208,6 +216,7 @@ footer a{color:inherit}
   <label class="inl" for="max" hidden>Maks. diputar
     <select id="max"><option>1</option><option>2</option><option>4</option><option>6</option><option selected>9</option><option>12</option><option>20</option></select>
   </label>
+  <button id="lsBtn" title="Daftar semua kamera: lokasi dan status online/offline">📋 Daftar kamera</button>
   <details class="more"><summary>⋯ Lainnya</summary><div class="menu">
   <button id="lite" aria-pressed="false" title="Untuk TV / perangkat lemah: 1 video sekaligus, pratinjau tur tanpa video">Mode ringan (TV)</button>
   <button id="re">Cek ulang status</button>
@@ -249,6 +258,11 @@ footer a{color:inherit}
 <dialog id="dlg">
   <div class="dh"><span id="dT">Kamera</span><span><span id="dMsg" aria-live="polite" style="font:500 13px Inter,sans-serif;color:#8fb3c0"></span> <button id="dShare" style="background:#18a36b;border-color:#18a36b" title="Kirim cuplikan beberapa detik terakhir, misalnya ke WhatsApp">📤 Bagikan ±6 detik</button> <button id="dPrev" aria-label="Kamera sebelumnya">‹</button> <button id="dNext" aria-label="Kamera berikutnya">›</button> <button id="dX">Tutup</button></span></div>
   <video id="dV" muted playsinline controls></video>
+</dialog>
+
+<dialog id="ls" class="ls">
+  <div class="dh"><span>📋 Daftar kamera <small id="lsSum"></small></span><span><button id="lsF" title="Ganti tampilan">Semua</button> <button id="lsX">Tutup</button></span></div>
+  <div class="lsb"><table><thead><tr><th>Cam</th><th>Lokasi</th><th>Status</th></tr></thead><tbody id="lsT"></tbody></table></div>
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
@@ -391,6 +405,25 @@ function openCam(i){
   dh=attach(dV,url(i),()=>{$('dT').textContent='Kamera '+i+' – stream gagal dimuat'});
   if(!dlg.open)dlg.showModal();
   clipStart();
+}
+// ===== DAFTAR KAMERA: lokasi + status online/offline, klik untuk membuka =====
+{
+  const ls=$('ls');let mode='all';const MODE={all:'Semua',on:'Online',off:'Offline'};
+  const isi=()=>{const rows=[];let on=0,off=0;
+    for(const c of [...urut].sort((a,b)=>a.i-b.i)){if(c.status==='on')on++;else if(c.status==='off')off++;
+      if(mode!=='all'&&c.status!==mode)continue;
+      const st=c.status==='on'?'● online':c.status==='off'?'● offline':'… cek';
+      rows.push(`<tr tabindex="0" data-i="${c.i}"><td>${c.i}</td><td>${esc(nama(c.i)||'Lokasi belum diberi nama')}</td><td class="st ${c.status}">${st}</td></tr>`)}
+    if(mode==='all')try{for(const i of Object.keys(BANYUASIN))rows.push(`<tr tabindex="0" data-b="${i}"><td>B${i}</td><td>Banyuasin · ${esc(BANYUASIN[i]||'Cam '+i)}</td><td class="st lk">↗ situs resmi</td></tr>`)}catch(e){}
+    $('lsT').innerHTML=rows.join('');$('lsSum').textContent=`· ${on} online · ${off} offline`;$('lsF').textContent='Tampil: '+MODE[mode]};
+  const buka=tr=>{if(!tr)return;if(tr.dataset.b){try{window.open(bUrl(tr.dataset.b),'_blank','noopener')}catch(e){}return}
+    const i=+tr.dataset.i;if(cams[i-1].status==='off')return;ls.close();openCam(i)};
+  $('lsT').onclick=e=>buka(e.target.closest('tr'));
+  $('lsT').onkeydown=e=>{if(e.key==='Enter')buka(e.target.closest('tr'))};
+  $('lsBtn').onclick=()=>{isi();ls.showModal();const f=$('lsT').querySelector('tr');f&&f.focus()};
+  $('lsF').onclick=()=>{mode=mode==='all'?'on':mode==='on'?'off':'all';isi()};
+  $('lsX').onclick=()=>ls.close();
+  setInterval(()=>{if(ls.open&&urut.some(c=>c.status==='cek'))isi()},3000); // segarkan selama masih ada yang dicek
 }
 // ===== CUPLIKAN UNTUK DIBAGIKAN =====
 // Diambil langsung dari potongan stream asli (segmen HLS ±6 detik yang sedang diputar), diubah ke MP4 di browser.
